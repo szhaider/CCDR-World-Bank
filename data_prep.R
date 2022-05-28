@@ -1,0 +1,228 @@
+#Utils
+library(tidyverse)
+library(sf)
+library(glue)
+library(janitor)
+
+rm(list=ls())
+
+#Data Dreparation
+
+################################################################################
+#Reading in Shapefiles
+#District UNOCHA
+
+district_shp <-  read_sf("data/shapefile_district/pakistan_indicators.shp") %>% 
+  clean_names() %>% 
+  filter(year == 2018) %>% 
+  select(year, province, district, geometry) %>% 
+  st_as_sf() %>% 
+  mutate(district = str_remove(district, " Agency")) %>% 
+  arrange(district) %>% 
+  st_transform(crs=4326) %>% 
+  mutate(polygon = "district")
+
+#Teshil Shape File
+
+tehsil_shp <- read_sf("data/Tehsils_shp_UNOCHA/pak_admbnda_adm3_ocha_pco_gaul_20181218.shp")%>% 
+  clean_names() %>% 
+  select(province = adm1_en, district = adm2_en, tehsil = adm3_en, geometry) %>% 
+  st_as_sf() %>% 
+  st_transform(crs=4326) %>% 
+  mutate(polygon = "tehsil") %>% 
+  arrange(tehsil)
+################################################################################
+#Reading Data
+#Natural Hazard Data
+natural_hazards <- rio::import_list("data/Pakistan_Natural Hazard Exposure and Impact_Districts Tehsils.xlsx")
+
+hazards_district <- natural_hazards[["PAK_District_SUMMARY"]] %>% 
+  as_tibble()%>% 
+  rename(province = ADM1_NAME, district = ADM2_NAME) %>% 
+  arrange(district)
+
+hazards_tehsil <- natural_hazards[["PAK_Tehsil_SUMMARY"]]%>% 
+  as_tibble() %>% 
+  rename(province = ADM1_NAME , district = ADM2_NAME, tehsil = ADM3_NAME) %>% 
+  arrange(tehsil) 
+# %>% 
+#   mutate(tehsil =
+#            case_when(
+#              tehsil == 'Ahmadupr E' ~ 'Ahmadupr East',
+#              tehsil == 'Ahmedpur S' ~ 'Ahmedpur Sial',
+#              tehsil == 'Ambar Utma' ~ 'Ambar Utman Khel',
+#              tehsil == 'Bahawalnag' ~ 'Bahawalnagar',
+#              tehsil == 'Banda Daud' ~ 'Banda Daud Shah',
+#              tehsil == 'Bar Chamar' ~ 'Bar Chamarkand',
+#              tehsil == 'Bulri Shah' ~ 'Bulri Shah Karim',
+#              tehsil == 'Central Ku' ~ 'Central Kurram',
+#              tehsil == 'Central Or' ~ 'Central Orakzai',
+#              tehsil == 'Chak Jhumr' ~ 'Chak Jhumra',
+#              tehsil == 'Chichawatn' ~ 'Chichawatni',
+#              tehsil == 'Choa Saida' ~ 'Choa Saidan Shah',
+#              tehsil == 'Darra Adam' ~ 'Darra Adam Khel',
+#              tehsil == 'Dasht (Kec' ~ 'Dasht (Kech)',
+#              tehsil == 'Dasht (Mas' ~ 'Dasht (Mastung)',
+#              tehsil == 'De- Exclud' ~ 'De- Excluded Area Rajanpur',
+#              tehsil == 'De-exclude' ~ 'De-excluded Area D.G.Khan',
+#              tehsil == 'Dera Ghazi' ~ 'Dera Ghazi Khan',
+#              tehsil == 'Dera Ismai' ~ 'Dera Ismail Khan',
+#              tehsil == 'Dera Murad' ~ 'Dera Murad Jamali',
+#              tehsil == 'Faisalabad' ~ 'Faisalabad City',
+#              tehsil == 'Faisalabad' ~ 'Faisalabad Saddar',
+#              tehsil == 'Garhi Khai' ~ 'Garhi Khairo',
+# 
+#              tehsil == 'Garhi Yasi' ~ 'Garhi Yasin',
+#              tehsil == 'Ghulam Kha' ~ 'Ghulam Khan',
+#              tehsil == 'Hassan Abd' ~ 'Hassan Abdal',
+#              tehsil == 'Hassan Khe' ~ 'Hassan Khel',
+#              tehsil == 'Hyderabad' ~  'Hyderabad City',
+#              tehsil == 'Jalalpur P' ~ 'Jalalpur Pirwala',
+#              tehsil == 'Jan Nawaz' ~ 'Jan Nawaz Ali',
+#              tehsil == 'Kahror Pac' ~ 'Kahror Pacca',
+#              tehsil == 'Kairpur Ta' ~ 'Kairpur Tamewali',
+#              tehsil == 'Kakar Khur' ~ 'Kakar Khurasan',
+#              tehsil == 'Kallar Kah' ~ 'Kallar Kahar',
+#              tehsil == 'Kallar Say' ~ 'Kallar Sayedan',
+#              tehsil == 'Kambar Ali' ~ 'Kambar Ali Khan',
+#              tehsil == 'Kan Mehtar' ~ 'Kan Mehtarzai',
+#              tehsil == 'Karachi Ce' ~ 'Karachi Central',
+#              tehsil == 'Karachi Ea' ~ 'Karachi East',
+#              tehsil == 'Karachi So' ~ 'Karachi South',
+#              tehsil == 'Karachi We' ~ 'Karachi West',
+#              tehsil == 'Karor Lal' ~ 'Karor Lal Esan',
+#              tehsil == 'Keti Bande' ~ 'Keti Bander',
+#              tehsil == 'Khairpur N' ~ 'Khairpur Nathan Shah',
+#              tehsil == 'Khanpur (R' ~ 'Khanpur (Rahim Yar Khan)',
+#              tehsil == 'Khanpur (S' ~ 'Khanpur (Shikarpur)',
+#              tehsil == 'Khwazakhel' ~ 'Khwazakhela',
+#              tehsil == 'Killa Abdu' ~ 'Killa Abdullah',
+#              tehsil == 'Killa Saif' ~ 'Killa Saifullah',
+#              tehsil == 'Kot Ghulam' ~ 'Kot Ghulam Muhammad',
+#              tehsil == 'Kotli Satt' ~ 'Kotli Sattian',
+#              tehsil == 'Lahore Can' ~ 'Lahore Cantt',
+#              tehsil == 'Lahore Cit' ~ 'Lahore City',
+#              tehsil == 'Lakki Marw' ~ 'Lakki Marwat',
+#              tehsil == 'Landi Kota' ~ 'Landi Kotal',
+#              tehsil == 'Lower Kurr' ~ 'Lower Kurram',
+#              tehsil == 'Lower Orak' ~ 'Lower Orakzai',
+#              tehsil == 'Mandi Baha' ~ 'Mandi Bahauddin',
+#              tehsil == 'Matta Khar' ~ 'Matta Khararai',
+#              tehsil == 'Matta Sebu' ~ 'Matta Sebujni',
+#              tehsil == 'Mian Chann' ~ 'Mian Channu',
+#              tehsil == 'Minchinaba' ~ 'Minchinabad',
+#              tehsil == 'Mirpur Bat' ~ 'Mirpur Bathoro',
+#              tehsil == 'Mirpur Kha' ~ 'Mirpur Khas',
+#              tehsil == 'Mirpur Mat' ~ 'Mirpur Mathelo',
+#              tehsil == 'Mirpur Sak' ~ 'Mirpur Sakro',
+#              tehsil == 'Multan Cit' ~ 'Multan City',
+#              tehsil == 'Multan Sad' ~ 'Multan Saddar',
+#              tehsil == 'Muslim Bag' ~ 'Muslim Bagh',
+#              tehsil == 'Muzaffarga' ~ 'Muzaffargarh',
+#              tehsil == 'Nagarparka' ~ 'Nagarparkar',
+#              tehsil == 'Nankana Sahib' ~ 'Nankana Sahib',
+#              tehsil == 'Naushahro' ~ 'Naushahro Feroze',
+#              tehsil == 'Nowshera V' ~ 'Nowshera Virkan',
+#              tehsil == 'Pind Dadan' ~ 'Pind Dadan Khan',
+#              tehsil == 'Pindi Bhat' ~ 'Pindi Bhattian',
+#              tehsil == 'Pir Baba/' ~ 'Pir Baba/ Gadaizi',
+#              tehsil == 'Qubo Saeed' ~ 'Qubo Saeed Khan',
+#              tehsil == 'Quetta Cit' ~ 'Quetta City',
+#              tehsil == 'Rahim Yar' ~ 'Rahim Yar Khan',
+#              tehsil == 'Renala Khu' ~ 'Renala Khurd',
+#              tehsil == 'Sahiwal (Sahiwal)' ~ 'Sahiwal (Sahiwal)',    #Sahiwal (Sardogha) == NA
+#              tehsil == 'Salarzai Tehsil' ~ 'Salarzai T',
+#              tehsil == 'Sam Raniza' ~ 'Sam Ranizai',
+#              tehsil == 'Sangla Hil' ~ 'Sangla Hill',
+#              tehsil == 'Sarai Alam' ~ 'Sarai Alamgir',
+#              tehsil == 'Sarai Naur' ~ 'Sarai Naurang',
+#              tehsil == 'Shah Bande' ~ 'Shah Bander',
+#              tehsil == 'Shaheed Fa' ~ 'Shaheed Fazal Rahu',
+#              tehsil == 'Sheikhupur' ~ 'Sheikhupura',
+#              tehsil == 'Swat Raniz' ~ 'Swat Ranizai',
+#              tehsil == 'Takht E Na' ~ 'Takht E Nasrati',
+#              tehsil == 'Tandlianwa' ~ 'Tandlianwala',
+#              tehsil == 'Tando Alla' ~ 'Tando Allah Yar',
+#              tehsil == 'Tando Ghul' ~ 'Tando Ghulam Hyder',
+#              tehsil == 'Tando Muha' ~ 'Tando Muhammad Khan',
+#              tehsil == 'Thano Bula' ~ 'Thano Bula Khan',
+#              tehsil == 'Toba Tek S' ~ 'Toba Tek Singh',
+#              tehsil == 'Upper Kurr' ~ 'Upper Kurram',
+#              tehsil == 'Upper Moma' ~ 'Upper Momand',
+#              tehsil == 'Upper Orak' ~ 'Upper Orakzai',
+#              tehsil == 'Usta Muham' ~ 'Usta Muhammad',
+#              tehsil == 'Utman Khel' ~ 'Utman Khel Tehsil',
+#              TRUE ~ tehsil
+# 
+#             )) %>%
+#   arrange(tehsil)
+           # pivot_longer(ADM3_pop:`AP_pop_EAI%`,names_to = "indicator", values_to = "value") %>% View()
+           #  pivot_wider(names_from = tehsil, values_from = value) %>% 
+           #  mutate(`Faisalabad Sadar` = NA,
+           #         `Sahiwal (Sardogha)` = NA,
+           #         `Hyderabad City`  = NA
+           #         ) %>% 
+           #  pivot_longer(Wazirabad:`Hyderabad City`, names_to = "tehsil", values_to = "value") %>% 
+           #  View()
+           #  
+
+
+legend <- natural_hazards[["Legend"]] %>% 
+  as_tibble() 
+
+# View(natural_hazards)
+
+#Socio-economic Indicator
+development_indicators <- readxl::read_excel("data/pak_sub_ADM2_handover.xlsx") %>% 
+  rename(district = ADM2_EN) %>% 
+  filter(district != "Karachi Central",       #Karachi City is available, we dont have these in UNOCHA 
+         district != "Karachi East",
+         district != "Karachi Malir",
+         district != "Karachi South",
+         district != "Karachi West") %>% 
+  arrange(district)
+# View(development_indicators)
+
+#Making a List frame
+data <- list(hazards_district=hazards_district, hazards_tehsil=hazards_tehsil, development_indicators=development_indicators)
+data %>% write_rds("CCDR_Dashboard/data/data.RDS")
+
+# View(data)
+
+
+#Natual Hazards all matched
+is.element(district_shp$district, hazards_district$district)
+is.element(hazards_district$district, district_shp$district)
+
+#Development indicators all matched
+is.element(district_shp$district, development_indicators$district)
+is.element(development_indicators$district, district_shp$district)
+
+# x<- district_shp %>% as_tibble() %>% distinct(district)
+# y <- hazards_district %>% distinct(district)
+
+#Matching Tehsil Names with UNOCHA
+
+tehsil_1 <- tehsil_shp$tehsil
+
+hazards_tehsil <- hazards_tehsil %>%
+  bind_cols(tehsil1= tehsil_1) %>% 
+  select(-tehsil) %>% 
+  rename(tehsil = tehsil1)
+
+#All Matched
+is.element(tehsil_shp$tehsil, hazards_tehsil$tehsil)
+# is.element(x$tehsil, hazards_tehsil$tehsil)
+is.element(hazards_tehsil$tehsil, tehsil_shp$tehsil)
+
+# x <- tehsil_shp %>% as_tibble() %>% select(tehsil) 
+# %>% 
+#   filter(tehsil != "Faisalabad Saddar",
+#          tehsil != "Hyderabad City",
+#          tehsil != "Sahiwal (Sardogha)")
+# y <- hazards_tehsil %>% select(tehsil) 
+
+pak_shp <- list(district_shp = district_shp, tehsil_shp = tehsil_shp)
+pak_shp %>% write_rds("CCDR_Dashboard/data/pak_shp.RDS")
+################################################################################
+
