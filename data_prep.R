@@ -39,12 +39,38 @@ natural_hazards <- rio::import_list("data/Pakistan_Natural Hazard Exposure and I
 hazards_district <- natural_hazards[["PAK_District_SUMMARY"]] %>% 
   as_tibble()%>% 
   rename(province = ADM1_NAME, district = ADM2_NAME) %>% 
-  arrange(district)
+  select(-ADM0_CODE, -ADM0_NAME, -ADM1_CODE, -ADM2_CODE) %>% 
+  rename(dist_population = ADM2_pop) %>% 
+  arrange(district) %>% 
+  pivot_longer(dist_population:`AP_pop_EAI%` ,names_to = "indicator", values_to = "value") %>% 
+  mutate(polygon = "District")
 
 hazards_tehsil <- natural_hazards[["PAK_Tehsil_SUMMARY"]]%>% 
   as_tibble() %>% 
-  rename(province = ADM1_NAME , district = ADM2_NAME, tehsil = ADM3_NAME) %>% 
+  select(-ADM0_CODE, -ADM1_CODE, -ADM2_CODE, -ADM3_CODE, -ADM0_NAME) %>% 
+  rename(province = ADM1_NAME , district = ADM2_NAME, tehsil = ADM3_NAME) %>%
+  rename(tehsil_poplation = ADM3_pop) %>% 
   arrange(tehsil) 
+
+#Matching Tehsil Names with UNOCHA
+tehsil_1 <- tehsil_shp$tehsil
+
+hazards_tehsil <- hazards_tehsil %>%
+  bind_cols(tehsil1= tehsil_1) %>% 
+  select(-tehsil) %>% 
+  rename(tehsil = tehsil1)
+
+#All Matched
+# is.element(tehsil_shp$tehsil, hazards_tehsil$tehsil)
+# # is.element(x$tehsil, hazards_tehsil$tehsil)
+# is.element(hazards_tehsil$tehsil, tehsil_shp$tehsil)
+
+hazards_tehsil <- hazards_tehsil %>% 
+  pivot_longer(tehsil_poplation:`AP_pop_EAI%` ,names_to = "indicator", values_to = "value") %>% 
+  mutate(polygon = "Tehsil")
+
+hazards <- bind_rows(hazards_district, hazards_tehsil)
+
 # %>% 
 #   mutate(tehsil =
 #            case_when(
@@ -173,47 +199,35 @@ legend <- natural_hazards[["Legend"]] %>%
 # View(natural_hazards)
 
 #Socio-economic Indicator
-development_indicators <- readxl::read_excel("data/pak_sub_ADM2_handover.xlsx") %>% 
+development_indicators <- readxl::read_excel("data/pak_sub_ADM2_handover.xlsx", na="NA") %>% 
   rename(district = ADM2_EN) %>% 
   filter(district != "Karachi Central",       #Karachi City is available, we dont have these in UNOCHA 
          district != "Karachi East",
          district != "Karachi Malir",
          district != "Karachi South",
          district != "Karachi West") %>% 
-  arrange(district)
+  arrange(district) %>% 
+  pivot_longer(`Population (WorldPop 2020)`:`Lack of access to improved toilet facilities (PSLM 2014/2019)`,names_to = "indicator", values_to = "value")
 # View(development_indicators)
 
 #Making a List frame
-data <- list(hazards_district=hazards_district, hazards_tehsil=hazards_tehsil, development_indicators=development_indicators)
+data <- list(hazards = hazards, development_indicators=development_indicators)
 data %>% write_rds("CCDR_Dashboard/data/data.RDS")
 
 # View(data)
 
 
 #Natual Hazards all matched
-is.element(district_shp$district, hazards_district$district)
-is.element(hazards_district$district, district_shp$district)
-
-#Development indicators all matched
-is.element(district_shp$district, development_indicators$district)
-is.element(development_indicators$district, district_shp$district)
+# is.element(district_shp$district, hazards_district$district)
+# is.element(hazards_district$district, district_shp$district)
+# 
+# #Development indicators all matched
+# is.element(district_shp$district, development_indicators$district)
+# is.element(development_indicators$district, district_shp$district)
 
 # x<- district_shp %>% as_tibble() %>% distinct(district)
 # y <- hazards_district %>% distinct(district)
 
-#Matching Tehsil Names with UNOCHA
-
-tehsil_1 <- tehsil_shp$tehsil
-
-hazards_tehsil <- hazards_tehsil %>%
-  bind_cols(tehsil1= tehsil_1) %>% 
-  select(-tehsil) %>% 
-  rename(tehsil = tehsil1)
-
-#All Matched
-is.element(tehsil_shp$tehsil, hazards_tehsil$tehsil)
-# is.element(x$tehsil, hazards_tehsil$tehsil)
-is.element(hazards_tehsil$tehsil, tehsil_shp$tehsil)
 
 # x <- tehsil_shp %>% as_tibble() %>% select(tehsil) 
 # %>% 
