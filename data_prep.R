@@ -1,6 +1,7 @@
 #Utils
 library(tidyverse)
 library(sf)
+
 library(glue)
 library(janitor)
 
@@ -41,9 +42,9 @@ hazards_district <- natural_hazards[["PAK_District_SUMMARY"]] %>%
   rename(province = ADM1_NAME, district = ADM2_NAME) %>% 
   select(-ADM0_CODE, -ADM0_NAME, -ADM1_CODE, -ADM2_CODE) %>% 
   rename(dist_population = ADM2_pop) %>% 
-  arrange(district) %>% 
   pivot_longer(dist_population:`AP_pop_EAI%` ,names_to = "indicator", values_to = "value") %>% 
-  mutate(polygon = "District")
+  mutate(polygon = "District") %>% 
+  arrange(district)
 
 hazards_tehsil <- natural_hazards[["PAK_Tehsil_SUMMARY"]]%>% 
   as_tibble() %>% 
@@ -67,9 +68,11 @@ hazards_tehsil <- hazards_tehsil %>%
 
 hazards_tehsil <- hazards_tehsil %>% 
   pivot_longer(tehsil_poplation:`AP_pop_EAI%` ,names_to = "indicator", values_to = "value") %>% 
-  mutate(polygon = "Tehsil")
+  mutate(polygon = "Tehsil") %>% 
+  arrange(tehsil)
 
-hazards <- bind_rows(hazards_district, hazards_tehsil)
+hazards <- bind_rows(hazards_district, hazards_tehsil) %>% 
+  mutate(domain = "Natural Hazards")
 
 # %>% 
 #   mutate(tehsil =
@@ -206,12 +209,29 @@ development_indicators <- readxl::read_excel("data/pak_sub_ADM2_handover.xlsx", 
          district != "Karachi Malir",
          district != "Karachi South",
          district != "Karachi West") %>% 
-  arrange(district) %>% 
-  pivot_longer(`Population (WorldPop 2020)`:`Lack of access to improved toilet facilities (PSLM 2014/2019)`,names_to = "indicator", values_to = "value")
+  pivot_longer(`Population (WorldPop 2020)`:`Lack of access to improved toilet facilities (PSLM 2014/2019)`,
+               names_to = "indicator", 
+               values_to = "value") %>% 
+  mutate(polygon = "District")
 # View(development_indicators)
+#since province is missing in development indicators, bringing in province
+prov <- district_shp %>% 
+  as_tibble() %>% 
+  select(province, district)
+
+development_indicators <- development_indicators %>% 
+  left_join(prov, by="district") %>% 
+  mutate(domain = "Development Outcomes") %>% 
+  arrange(district)
+
 
 #Making a List frame
-data <- list(hazards = hazards, development_indicators=development_indicators)
+# data <- list(hazards = hazards, development=development_indicators)
+
+#Combining all data
+data <- hazards %>% 
+  bind_rows(development_indicators)
+
 data %>% write_rds("CCDR_Dashboard/data/data.RDS")
 
 # View(data)
@@ -236,7 +256,7 @@ data %>% write_rds("CCDR_Dashboard/data/data.RDS")
 #          tehsil != "Sahiwal (Sardogha)")
 # y <- hazards_tehsil %>% select(tehsil) 
 
-pak_shp <- list(district_shp = district_shp, tehsil_shp = tehsil_shp)
+pak_shp <- list(District = district_shp, Tehsil = tehsil_shp)
 pak_shp %>% write_rds("CCDR_Dashboard/data/pak_shp.RDS")
 ################################################################################
 

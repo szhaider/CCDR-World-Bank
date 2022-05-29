@@ -2,9 +2,25 @@
 #Utils
 library(shiny)
 library(dplyr)
-library(shinycssloaders)
+library(tidyr)
+library(ggplot2)
+library(plotly)
+library(scales)
+library(forcats)
+library(shinyscreenshot)
+library(glue)
 library(leaflet)
-# library(shinydashboard)
+library(sf)
+library(shinythemes)
+library(shinycssloaders)
+library(htmltools)
+library(DT)
+library(lubridate)
+library(shinydashboard)
+library(shinyWidgets)
+# library(leafsync)
+library(highcharter)
+# library(broom)
 
 
 
@@ -17,16 +33,30 @@ data <- readRDS("data/data.RDS")
 
 
 #Socio-Economic Indicators List
-development_outcomes <- unique(data[["development_indicators"]]$indicator)  
+# development_options <- data %>% 
+#   filter(domain == "Development Outcomes") %>% 
+#   distinct(indicator) %>% 
+#   pull(indicator)
 
 #Natural Hazard Option List
-hazards_options <- unique(data[["hazards"]]$indicator)
+hazards_options <- data %>% 
+  filter(domain == "Natural Hazards") %>% 
+  distinct(indicator) %>% 
+  pull(indicator)
+
+#Domain 
+domain_options <- data %>% 
+  distinct(domain) %>% 
+  pull(domain)
                               
 # Spatial Level
-spatial_level <- c("District" = "district_shp", "Tehsil" = "tehsil_shp")
+spatial_level <- unique(data$polygon)
 
-#Data domain
-data_type <- c("Natural Hazards" = "hazards", "Development Outcomes" = "development_indicators")
+#Listed Indicator Options
+# indicator_listed = (list(`Natural Hazards` = list("Original Budget", "Original Budget Per Capita", "Original Budget Per Poor Person"),
+#                           `Final Budget` = list("Final Budget", "Final Budget Per Capita","Final Budget Per Poor Person", "Ratio - Final to Original Budget"),
+#                           `Actual Expenses` = list("Actual Expenses", "Actual Expenses Per Capita","Actual Expenses Per Poor Person",  "Ratio - Actual Expenses to Original Budget", "Ratio - Actual Expenses to Final Budget")))
+
 
 ################################################################################
 
@@ -49,7 +79,7 @@ ui <- navbarPage("CLIMATE Dashboard",
                           
                           absolutePanel(id = "controls", class = "panel panel-default", fixed= TRUE,
                                         draggable = TRUE, bottom = "auto", right = "auto", left = 70, top = 80,
-                                        width = 240, height = "auto",
+                                        width = 250, height = "auto",
                                         style = "background-color: white;
                                                    opacity: 0.85;
                                                    padding: 20px 20px 20px 20px;
@@ -58,23 +88,23 @@ ui <- navbarPage("CLIMATE Dashboard",
                                                    box-shadow: 0pt 0pt 6pt 0px rgba(61,59,61,0.48);
                                                    padding-bottom: 2mm;
                                                    padding-top: 1mm;",
-                                        
-                                      selectInput("domain_map",
-                                                  "Choose Data Type",
-                                                  choices = data_type,
-                                                  selectize = F),
                                       
-                                      # conditionalPanel(
-                                      # condition = "input.domain_map == 'Natural Hazards'",
-                                       selectInput("polygon_map",
-                                               "Choose Spatial Level",
-                                               choices = spatial_level,
-                                               selectize = F),
-                                       # ),
-                                        
-                                        selectInput("indicator_map",
+                                      selectInput("domain_map",
+                                                    "Choose Domain",
+                                                    choices = domain_options,
+                                                    selected = domain_options[1],
+                                                    selectize = F),   
+                                      conditionalPanel(
+                                      condition = "input.domain_map == 'Natural Hazards'",
+                                      selectInput("polygon_map",
+                                                    "Choose Spatial Level",
+                                                    choices = spatial_level,
+                                                    selected = spatial_level[1],
+                                                    selectize = F)
+                                      ),
+                                      selectInput("indicator_map",
                                                "Choose Indicator",
-                                               choices = development_outcomes,
+                                               choices = hazards_options,
                                                selectize = F),
                                         # radioButtons("pallettes_fed", ("Change Color Scheme"), inline = TRUE, choices = list("Values"  = "pallette_fed1",
                                         # h6(tags$b(tags$em("Use this button to download the data underlying the current on-screen map"))),
@@ -83,6 +113,82 @@ ui <- navbarPage("CLIMATE Dashboard",
                                         actionButton("help_map", "Help", icon= icon('question-circle'), class ="btn-sm"),
                                         br()
                           )
+                 ),
+                 tabPanel("Graphs",
+                         
+                          sidebarLayout(
+                            sidebarPanel(width= 3,
+                                         style = "background-color: white;
+                               opacity: 0.85;  
+                               padding: 20px 20px 20px 20px;
+                               margin: auto;
+                               border-radius: 5pt;
+                               box-shadow: 0pt 0pt 6pt 0px rgba(61,59,61,0.48);
+                               padding-bottom: 2mm;
+                               padding-top: 1mm;",
+                           
+                                                       
+                          selectInput(
+                            "province_bar",
+                            "Choose Province",
+                            choices = unique(data$province),
+                            selectize = F
+                          ),
+                          
+                          selectInput(
+                            "domain_bar",
+                            "Choouose Domain",
+                            choices = unique(data$domain)
+                          ),
+                          
+                          selectInput(
+                            "indicator_bar",
+                            "Choose Indicator",
+                            choices = unique(data$indicator),
+                            selectize = F
+                          )),
+                          mainPanel(
+                            
+                            highchartOutput('bar_chart')
+                          )
+                          )
+                          
+                          ),
+                 tabPanel("TABLES",
+                          sidebarLayout(
+                            sidebarPanel(
+                              width = 3,
+                              style = "background-color: white;
+                               opacity: 0.85;  
+                               padding: 20px 20px 20px 20px;
+                               margin: auto;
+                               border-radius: 5pt;
+                               box-shadow: 0pt 0pt 6pt 0px rgba(61,59,61,0.48);
+                               padding-bottom: 2mm;
+                               padding-top: 1mm;",
+                              
+                              selectInput("table_province",
+                                          "Choose Province",
+                                          choices = unique(data$province),
+                                          selectize = F),
+                              selectInput("table_polygon",
+                                          "Choose Spatial Level",
+                                          choices = unique(data$polygon),
+                                          selectize = F),
+                              selectInput("table_domain",
+                                          "Choose Doamin",
+                                          choices = unique(data$domain),
+                                          selectize = F),
+                              selectInput("table_indicator",
+                                          "Choose Indicator",
+                                          choices = unique(data$indicator),
+                                          selectize = F)
+                            ),
+                            mainPanel(
+                              dataTableOutput("tables_main")
+                            )
+                          )
+                   
                  )
 )
                  
@@ -94,9 +200,15 @@ ui <- navbarPage("CLIMATE Dashboard",
 ################################################################################
 server <- function(input, output, session) {
 
+################################################################################
 #Main Maps
 source(file.path("maps.R"), local = TRUE)
-  
+################################################################################
+#Bar Charts
+source(file.path('bar_charts.R'), local = TRUE)  
+################################################################################
+#Main Tables
+source(file.path("tables.R"), local = TRUE)  
 }
 ################################################################################
 
