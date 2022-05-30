@@ -1,9 +1,11 @@
 #Utils
-library(tidyverse)
+library(readr)
+library(dplyr)
 library(sf)
-
+library(stringr)
 library(glue)
 library(janitor)
+library(rio)
 
 rm(list=ls())
 
@@ -230,7 +232,13 @@ development_indicators <- development_indicators %>%
 
 #Combining all data
 data <- hazards %>% 
-  bind_rows(development_indicators)
+  bind_rows(development_indicators) %>% 
+  mutate(value = 
+           case_when(
+          domain == "Development Outcomes" ~ round(value, 2),
+          domain == "Natural Hazards" ~ round(value, 4)
+          )
+  )
 
 data %>% write_rds("CCDR_Dashboard/data/data.RDS")
 

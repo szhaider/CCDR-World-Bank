@@ -171,20 +171,36 @@ ui <- navbarPage("CLIMATE Dashboard",
                                           "Choose Province",
                                           choices = unique(data$province),
                                           selectize = F),
+                              
+                              selectInput("table_domain",
+                                          "Choose Domain",
+                                          choices = unique(data$domain),
+                                          selectize = F),
+                              conditionalPanel(
+                              condition = "input.table_domain == 'Natural Hazards'",
                               selectInput("table_polygon",
                                           "Choose Spatial Level",
                                           choices = unique(data$polygon),
-                                          selectize = F),
-                              selectInput("table_domain",
-                                          "Choose Doamin",
-                                          choices = unique(data$domain),
-                                          selectize = F),
+                                          selectize = F)
+                              ),
                               selectInput("table_indicator",
                                           "Choose Indicator",
                                           choices = unique(data$indicator),
-                                          selectize = F)
+                                          selectize = F),
+                              
+                              verbatimTextOutput("source_table"),
+                              tags$head(tags$style("#source_table{color:black; font-size:12px; font-style:italic; 
+               overflow-y:scroll; max-height: 120px; background: #ffe6cc;}")),
+                              br(),
+                              downloadButton("downloadtable",
+                                             "Save",
+                                             type= "default", 
+                                             class="btn-sm"),
+                              actionButton("help_tables", "Help", icon= icon('question-circle'), class ="btn-sm")
+                            
                             ),
                             mainPanel(
+                              width=9,
                               dataTableOutput("tables_main")
                             )
                           )
