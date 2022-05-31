@@ -5,28 +5,74 @@
 observeEvent(input$help_bar, {
   showModal(modalDialog(
     title = "How to use these bar charts",
-    p("These bar charts give district level aggregations of BOOST indicators over the available years in each province"), 
-    p("Units for Original Budget, Final Budget and Actual Expenses are in LCU - Billion Rs."),
-    p("Units for per capita estimates are in levels LCU - Rs."),
-    p("All values rounded to 3 decimal points"),
-    # p("'Province Facet' will take the comparison to province level, where horizontal axes are fixed for comparison"),
-    p("User might see a friendly message if the data for selected specification isn't available yet."),
-    size = "m", easyClose = TRUE, fade=FALSE,footer = modalButton("Close (Esc)")))
+    p("These interactive bar charts give district level estimates of CCDR-Pakistan indicators for the selected province"), 
+    p("All Development Indicators are rounded to 2 decimal points"),
+    p("All Natural Hazards Indicators are rounded to 3 decimal points"),
+      size = "m", easyClose = TRUE, fade=FALSE,footer = modalButton("Close (Esc)")))
 })
+
+#Update Spatial Input Based on selected domain
+observeEvent(input$domain_bar,{
+ 
+  if(input$domain_bar == "Development Outcomes"){ 
+  updateSelectInput(
+    getDefaultReactiveDomain(),
+    "polygon_bar",
+    choices = unique(data$polygon)[1]
+  )
+  }else{
+    updateSelectInput(
+      getDefaultReactiveDomain(),
+      "polygon_bar",
+      choices = unique(data$polygon)
+    )
+  }
+})
+  
+#Update Indicators based on spatial level
+observeEvent(input$polygon_bar,{
+  observeEvent(input$domain_bar,{
+if(input$domain_bar == "Natural Hazards" & input$polygon_bar == "District"){
+    bar_choices_haz1 =  hazards_options[-c(24,25,26)]
+    updateSelectInput(
+      getDefaultReactiveDomain(),
+      "indicator_bar",
+      choices =bar_choices_haz1
+    )
+}else if(input$domain_bar == "Natural Hazards" & input$polygon_bar == "Tehsil"){
+  bar_choices_haz2 = hazards_options[-c(1,2,3)]
+  updateSelectInput(
+    getDefaultReactiveDomain(),
+    "indicator_bar",
+    choices = bar_choices_haz2
+  )
+}else{ 
+  updateSelectInput(
+    getDefaultReactiveDomain(),
+    "indicator_bar",
+    choices = development_options
+  )
+}
+  })
+})
+
+
+
 
 bar_chart_data <- function(){
 data %>% 
  filter(
-        polygon == "District", 
+        polygon == input$polygon_bar, 
         province == input$province_bar,
-        # domain == input$domain_bar,
-        indicator == input$indicator_bar) %>% 
+        domain == input$domain_bar,
+        indicator_1 == input$indicator_bar) %>% 
     arrange(desc(value))
 }
 
 #HighChart
 output$bar_chart <- renderHighchart({
 
+if(input$polygon_bar == "District"){  
 hc_bar <- highchart() %>% 
   hc_xAxis(categories = bar_chart_data()$district) %>% #title = list(text= input$description_bar)
   hc_chart(type='column',inverted=T) %>% 
@@ -34,19 +80,44 @@ hc_bar <- highchart() %>%
   # hc_yAxis(title = list(text = input$year_bar)) %>% 
   hc_plotOptions(series = list(hover= list(enabled= TRUE, linewidth = 10, color= "red"))) %>% 
   hc_labels(title = list(text= input$domain_bar)) %>% 
-  hc_title(text=input$indicator_bar) %>% 
-  hc_subtitle(text = "Source: World Bank BOOST Data") %>% 
+  hc_title(text=input$province_bar) %>% 
+  hc_subtitle(text = "Source: CCDR Pakistan") %>% 
   hc_exporting(enabled = T,
                filename= input$domain_bar, 
                buttons = list(contextButton = list(menuItems = c("downloadPNG", "downloadJPEG", "downloadCSV", "downloadXLS", "downloadPDF", "downloadSVG"))))  # %>% 
 #   export_hc("bar_chart.js")
 # 
+}else{
+  hc_bar <- highchart() %>% 
+    hc_xAxis(categories = bar_chart_data()$tehsil) %>% #title = list(text= input$description_bar)
+    hc_chart(type='column',inverted=T) %>% 
+    hc_add_series(name =  input$indicator_bar, bar_chart_data()$value) %>%
+    # hc_yAxis(title = list(text = input$year_bar)) %>% 
+    hc_plotOptions(series = list(hover= list(enabled= TRUE, linewidth = 10, color= "red"))) %>% 
+    hc_labels(title = list(text= input$domain_bar)) %>% 
+    hc_title(text=input$province_bar) %>% 
+    hc_subtitle(text = "Source: CCDR Pakistan") %>% 
+    hc_exporting(enabled = T,
+                 filename= input$domain_bar, 
+                 buttons = list(contextButton = list(menuItems = c("downloadPNG", "downloadJPEG", "downloadCSV", "downloadXLS", "downloadPDF", "downloadSVG"))))  # %>% 
+  #   export_hc("bar_chart.js")
+  # 
+}
+  
 hc_bar
 
 
 })
 
 
+output$labels_bar <- renderText({
+  unit_bar <- reactive({
+    bar_chart_data() %>% 
+    distinct(unit) %>% 
+    pull(unit)
+  })
+  paste0("Unit: ", unit_bar())
+})
 
 
   

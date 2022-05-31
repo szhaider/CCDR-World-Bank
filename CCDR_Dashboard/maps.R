@@ -5,11 +5,10 @@
 observeEvent(input$help_map, {
   showModal(modalDialog(
     title = "How to use these maps",
-    p("These maps give district level aggregations of BOOST indicators over the selected filters"), 
-    p("All the values for Original Budget, Final Budget and Actual Expenses are in LCU - Million Rs. (rounded to 2 decimal points)"),
-    p("All the values for Per Capita and Per Poor Person estimates are in Base LCU - Rs."),
-    p("User might switch between maps with color scheme based on Deciles or Values"),
-    p("BOOST Indicators have been log-normalized to make the values based maps visually informative - use the hovering tool-tip for original values"),
+    p("These maps give district level estimates of CCDR-Pakistan indicators over the selected filters"),
+    p("All Development Indicators are rounded to 2 decimal points"),
+    p("All Natural Hazards Indicators are rounded to 3 decimal points"),
+    p("Expect the color mapping to change with the context of  the selected indicators - e.g. Poverty (High) = Red whereas; Access to improved toilet facilities (High) = Blue"),
     size = "m", easyClose = TRUE, fade=FALSE,footer = modalButton("Close (Esc)")))
 })
 
@@ -25,7 +24,7 @@ map_data <- reactive({
  data %>% 
     filter(polygon   ==  input$polygon_map,
            domain    ==  input$domain_map,
-           indicator ==  input$indicator_map)
+           indicator_1 ==  input$indicator_map)
            })
 
 #Updating Indicators based on Domain
@@ -33,8 +32,8 @@ observeEvent(input$domain_map,{
   if( input$domain_map == "Development Outcomes"){
   choices_dev =  data %>% 
     filter(domain == "Development Outcomes") %>% 
-    distinct(indicator) %>% 
-    pull(indicator)
+    distinct(indicator_1) %>% 
+    pull(indicator_1)
   
   updateSelectInput(
   getDefaultReactiveDomain(),
@@ -94,11 +93,14 @@ observeEvent(input$domain_map,{
 #Labelling for  Map
 
 labels_map <- reactive({
-if(input$polygon_map == "District"){  
-    paste0(glue::glue("<b>District</b>: { pak_shp1()$district } </br>"), glue::glue("<b> { map_data()$indicator }: </b>"), " ", glue::glue("{ round(map_data()$value, 2) } (units)"), sep = "") %>% 
+if(input$domain_map == "Development Outcomes"){  
+    paste0(glue::glue("<b>District</b>: { pak_shp1()$district } </br>"), glue::glue("<b> { map_data()$indicator_1 }: </b>"), " ", glue::glue("{ round(map_data()$value, 2)  }"), " ", glue::glue("({ map_data()$unit })"), sep = "") %>% 
       lapply(htmltools::HTML) 
-}else if(input$polygon_map == "Tehsil"){
-  paste0(glue::glue("<b>Tehsil</b>: { pak_shp1()$tehsil } </br>"), glue::glue("<b> { map_data()$indicator }: </b>"), " ", glue::glue("{ round(map_data()$value, 2) } (units)"), sep = "") %>% 
+}else if(input$polygon_map == "Tehsil" & input$domain_map == "Natural Hazards"){
+  paste0(glue::glue("<b>Tehsil</b>: { pak_shp1()$tehsil } </br>"), glue::glue("<b> { map_data()$indicator_1 }: </b>"), " ", glue::glue("{ round(map_data()$value, 3) }"), " ", glue::glue("({ map_data()$unit })"),  sep = "") %>% 
+    lapply(htmltools::HTML) 
+}else if(input$polygon_map == "District" & input$domain_map == "Natural Hazards"){
+  paste0(glue::glue("<b>District</b>: { pak_shp1()$district } </br>"), glue::glue("<b> { map_data()$indicator_1 }: </b>"), " ", glue::glue("{ round(map_data()$value, 3) }"), " ", glue::glue("({ map_data()$unit })"), sep = "") %>% 
     lapply(htmltools::HTML) 
 }
 })
@@ -107,11 +109,23 @@ if(input$polygon_map == "District"){
 #Map Leaflet
 main_map <- reactive({
   
+  pal_new <- reactive({
+      req(unique(map_data()$context) %in% c("negative", "positive"))
+      if (unique(map_data()$context) == "negative"){
+        c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c')
+      } else {
+        c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6')
+      }
+      
+    })
+
   pal <- reactive({
-    colorBin(palette = c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6'), 
+    colorBin(palette = pal_new(), 
              bins= 7, na.color = "grey",  
              domain = map_data()$value , 
-             pretty = T)
+             pretty = T,
+             reverse=F)
+  
   })
   
   leaflet(pak_shp1(), options = leafletOptions(zoomSnap = 0.20, 
@@ -156,12 +170,17 @@ main_map <- reactive({
                      # overlayGroups = c("Polygons"),
                      options = layersControlOptions(collapsed = TRUE)) %>% 
     
-    addMeasure() %>% 
-    addScaleBar("bottomright") %>%
+    addScaleBar("bottomleft") %>%
+    addMeasure("bottomleft") %>% 
     addLegend("bottomright",
               pal= pal(),
               values= ~map_data()$value,
-              title = "Legend",
+              title = 
+                if(unique(map_data()$unit) != ""){
+                glue("Legend", " ", "({ unique(map_data()$unit)  })")
+                  }else{
+                    "Legend"
+                  },
               opacity= 1,
               # labFormat = labelFormat(prefix = "Rs.")
     )
@@ -239,3 +258,24 @@ output$maps <- renderLeaflet({
 #   main_map_tehsil()
 # }
 })
+
+output$source_map <- renderText({
+  paste("Source: World Bank CCDR Pakistan")
+})
+
+observeEvent(input$screenshot,{
+  screenshot(filename = glue("{ input$screenshot }", " ", "screenshot"), selector = "#maps", scale = 0.90, timer = 1)
+  
+})
+
+
+#Download data underlying the shown map
+output$mapdata <- downloadHandler(
+  filename = function(){
+    paste(glue("{ input$indicator_map }"), "_", glue("{ input$domain_map }"), ".csv")
+  },
+  content = function(file){
+    write.csv(map_data(), file) 
+  }
+)
+

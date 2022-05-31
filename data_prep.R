@@ -44,6 +44,7 @@ hazards_district <- natural_hazards[["PAK_District_SUMMARY"]] %>%
   rename(province = ADM1_NAME, district = ADM2_NAME) %>% 
   select(-ADM0_CODE, -ADM0_NAME, -ADM1_CODE, -ADM2_CODE) %>% 
   rename(dist_population = ADM2_pop) %>% 
+  mutate(dist_population = dist_population/1000) %>% 
   pivot_longer(dist_population:`AP_pop_EAI%` ,names_to = "indicator", values_to = "value") %>% 
   mutate(polygon = "District") %>% 
   arrange(district)
@@ -53,6 +54,7 @@ hazards_tehsil <- natural_hazards[["PAK_Tehsil_SUMMARY"]]%>%
   select(-ADM0_CODE, -ADM1_CODE, -ADM2_CODE, -ADM3_CODE, -ADM0_NAME) %>% 
   rename(province = ADM1_NAME , district = ADM2_NAME, tehsil = ADM3_NAME) %>%
   rename(tehsil_poplation = ADM3_pop) %>% 
+  mutate(tehsil_poplation = tehsil_poplation/1000) %>% 
   arrange(tehsil) 
 
 #Matching Tehsil Names with UNOCHA
@@ -204,6 +206,12 @@ legend <- natural_hazards[["Legend"]] %>%
 # View(natural_hazards)
 
 #Socio-economic Indicator
+
+#function to multiply by 100
+multiply100 <- function(col){
+  col * 100
+}
+
 development_indicators <- readxl::read_excel("data/pak_sub_ADM2_handover.xlsx", na="NA") %>% 
   rename(district = ADM2_EN) %>% 
   filter(district != "Karachi Central",       #Karachi City is available, we dont have these in UNOCHA 
@@ -211,6 +219,12 @@ development_indicators <- readxl::read_excel("data/pak_sub_ADM2_handover.xlsx", 
          district != "Karachi Malir",
          district != "Karachi South",
          district != "Karachi West") %>% 
+  mutate(`Population (WorldPop 2020)` = `Population (WorldPop 2020)`/100000,
+         `Access to improved toilet facilities (PSLM 2014)`= `Access to improved toilet facilities (PSLM 2014)`/100,
+         `Access to improved toilet facilities (PSLM 2019)` = `Access to improved toilet facilities (PSLM 2019)`/100,
+         `Access to improved toilet facilities (PSLM 2014/2019)`= `Access to improved toilet facilities (PSLM 2014/2019)`/100,
+         ) %>% 
+  mutate_if(is.numeric, multiply100) %>% 
   pivot_longer(`Population (WorldPop 2020)`:`Lack of access to improved toilet facilities (PSLM 2014/2019)`,
                names_to = "indicator", 
                values_to = "value") %>% 
@@ -240,7 +254,21 @@ data <- hazards %>%
           )
   )
 
-data %>% write_rds("CCDR_Dashboard/data/data.RDS")
+#For color mapping on Maps (to reverse for selected indicators)
+# data %>% 
+#   distinct(indicator) %>% 
+#   rio::export("legend.xlsx")
+
+#Reading in Color mapping file for data Join
+legend_data <- readxl::read_excel("legend_data.xlsx", na= " ") %>% 
+  mutate(unit = replace_na(unit, ""))
+
+ 
+
+data %>%
+  left_join(legend_data, by="indicator") %>% 
+  write_rds("CCDR_Dashboard/data/data.RDS")
+
 
 # View(data)
 

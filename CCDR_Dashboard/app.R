@@ -3,10 +3,10 @@
 library(shiny)
 library(dplyr)
 library(tidyr)
-library(ggplot2)
-library(plotly)
-library(scales)
-library(forcats)
+# library(ggplot2)
+# library(plotly)
+# library(scales)
+# library(forcats)
 library(shinyscreenshot)
 library(glue)
 library(leaflet)
@@ -15,10 +15,10 @@ library(shinythemes)
 library(shinycssloaders)
 library(htmltools)
 library(DT)
-library(lubridate)
+# library(lubridate)
 library(shinydashboard)
 library(shinyWidgets)
-# library(leafsync)
+library(leafsync)
 library(highcharter)
 # library(broom)
 
@@ -33,16 +33,16 @@ data <- readRDS("data/data.RDS")
 
 
 #Socio-Economic Indicators List
-# development_options <- data %>% 
-#   filter(domain == "Development Outcomes") %>% 
-#   distinct(indicator) %>% 
-#   pull(indicator)
+development_options <- data %>%
+  filter(domain == "Development Outcomes") %>%
+  distinct(indicator) %>%
+  pull(indicator)
 
 #Natural Hazard Option List
 hazards_options <- data %>% 
   filter(domain == "Natural Hazards") %>% 
-  distinct(indicator) %>% 
-  pull(indicator)
+  distinct(indicator_1) %>% 
+  pull(indicator_1)
 
 #Domain 
 domain_options <- data %>% 
@@ -70,10 +70,10 @@ ui <- navbarPage("CLIMATE Dashboard",
                  tabPanel("INTERACTIVE MAPS",
                           # bootstrapPage(),
                           # tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
-                          tags$style(type = 'text/css', '#maps {height: calc(90vh - 80px) !important;}', style= 'padding-top:0px;'),
+                          tags$style(type = 'text/css', '#maps {height: calc(98vh - 100px) !important;}', style= 'padding-top:0px;'),
                           leafletOutput("maps") %>%
                             withSpinner(),
-                          br(),
+                          # br(),
                           tags$head(tags$style("#source_map{color:black; font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
                           verbatimTextOutput("source_map"),
                           
@@ -88,7 +88,7 @@ ui <- navbarPage("CLIMATE Dashboard",
                                                    box-shadow: 0pt 0pt 6pt 0px rgba(61,59,61,0.48);
                                                    padding-bottom: 2mm;
                                                    padding-top: 1mm;",
-                                      
+                                      br(),
                                       selectInput("domain_map",
                                                     "Choose Domain",
                                                     choices = domain_options,
@@ -111,10 +111,91 @@ ui <- navbarPage("CLIMATE Dashboard",
                                         downloadButton("mapdata", "Data", class= "btn-sm"),
                                         actionButton("screenshot", "Image",class="btn-sm", icon=icon("camera")),
                                         actionButton("help_map", "Help", icon= icon('question-circle'), class ="btn-sm"),
-                                        br()
+                                        br(),
+                                      br(),
+                                      # br(),
                           )
                  ),
-                 tabPanel("Graphs",
+                 tabPanel("COMPARISON MAPS",
+                          sidebarLayout(
+                            sidebarPanel(
+                              width = 3,
+                              style = "background-color: white;
+                               opacity: 0.85;  
+                               padding: 20px 20px 20px 20px;
+                               margin: auto;
+                               border-radius: 5pt;
+                               box-shadow: 0pt 0pt 6pt 0px rgba(61,59,61,0.48);
+                               padding-bottom: 2mm;
+                               padding-top: 1mm;",
+                              
+                              selectInput("domain_map1",
+                                          "Choose Domain for MAP1",
+                                          choices = domain_options,
+                                          selected = domain_options[1],
+                                          selectize = F),   
+                              conditionalPanel(
+                                condition = "input.domain_map1 == 'Natural Hazards'",
+                                selectInput("polygon_map1",
+                                            "Choose Spatial Level for MAP1",
+                                            choices = spatial_level,
+                                            selected = spatial_level[1],
+                                            selectize = F)
+                              ),
+                              selectInput("indicator_map1",
+                                          "Choose Indicator for MAP1",
+                                          choices = hazards_options,
+                                          selectize = F),
+                              selectInput("domain_map2",
+                                          "Choose Domain for MAP2",
+                                          choices = domain_options,
+                                          selected = domain_options[1],
+                                          selectize = F),   
+                              conditionalPanel(
+                                condition = "input.domain_map2 == 'Natural Hazards'",
+                                selectInput("polygon_map2",
+                                            "Choose Spatial Level for MAP2",
+                                            choices = spatial_level,
+                                            selected = spatial_level[1],
+                                            selectize = F)
+                              ),
+                              selectInput("indicator_map2",
+                                          "Choose Indicator for MAP2",
+                                          choices = hazards_options,
+                                          selectize = F),
+                             
+                              # actionButton("screenshot_comp", "Screenshot",class="btn-sm", icon = icon("camera")),
+                              actionButton("help_comp", "Help", icon= icon('question-circle'), class ="btn-sm"),
+                            ),
+                          
+                            mainPanel(
+                              width = 9,
+                              uiOutput("double_map") %>% 
+                                withSpinner(),
+                              br(),
+                              br(),
+                              fluidRow(
+                                column(6,
+                                       offset = 0.5,
+                                       style = 'padding:1px;',   
+                                       tags$head(tags$style("#source_comp1{color:black; font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
+                                       verbatimTextOutput("source_comp1")),
+                                column(6, 
+                                       offset = 0,
+                                       style = 'padding-left:0px;',
+                                       tags$head(tags$style("#source_comp2{color:black; font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
+                                       verbatimTextOutput("source_comp2")
+                                       
+                                ))
+                            )
+                            )
+                            
+                            
+                          
+                          
+                   
+                 ),
+                 tabPanel("GRAPHS",
                          
                           sidebarLayout(
                             sidebarPanel(width= 3,
@@ -131,26 +212,51 @@ ui <- navbarPage("CLIMATE Dashboard",
                           selectInput(
                             "province_bar",
                             "Choose Province",
-                            choices = unique(data$province),
+                            choices = unique(data$province)[-5],
                             selectize = F
                           ),
                           
                           selectInput(
                             "domain_bar",
-                            "Choouose Domain",
+                            "Choose Domain",
                             choices = unique(data$domain)
+                          ),
+                         
+                          conditionalPanel(
+                          condition = "input.domain_bar == 'Natural Hazards'",  
+                          selectInput("polygon_bar",
+                                      "Choose Spatial Level",
+                                      choices = unique(data$polygon),
+                                      selected = "District",
+                                      selectize = F)
                           ),
                           
                           selectInput(
                             "indicator_bar",
                             "Choose Indicator",
-                            choices = unique(data$indicator),
+                            choices = unique(data$indicator_1),
                             selectize = F
-                          )),
+                          ),
+                          actionButton("help_bar", "Help", icon= icon('question-circle'), class ="btn-sm"),
+                         
+                            ),
                           mainPanel(
+                            # width = 8,
                             
-                            highchartOutput('bar_chart')
+                            highchartOutput('bar_chart',
+                                            width = '820px',
+                                            height = '500px'),
+                            
+                            fluidRow(
+                              # column(width = 4,
+                              #        h5(tags$strong("Units: "))),
+                              column(width = 8,
+                                     (uiOutput("labels_bar"))
+                              )
                           )
+                            
+                          )
+                         
                           )
                           
                           ),
@@ -185,7 +291,7 @@ ui <- navbarPage("CLIMATE Dashboard",
                               ),
                               selectInput("table_indicator",
                                           "Choose Indicator",
-                                          choices = unique(data$indicator),
+                                          choices = unique(data$indicator_1),
                                           selectize = F),
                               
                               verbatimTextOutput("source_table"),
@@ -205,7 +311,12 @@ ui <- navbarPage("CLIMATE Dashboard",
                             )
                           )
                    
-                 )
+                 ),
+                 tabPanel("ABOUT",
+                          mainPanel(
+                            
+                          )
+                          )
 )
                  
 
@@ -219,6 +330,9 @@ server <- function(input, output, session) {
 ################################################################################
 #Main Maps
 source(file.path("maps.R"), local = TRUE)
+################################################################################
+#Comparison Maps
+source(file.path("comparison_maps.R"), local = TRUE)  
 ################################################################################
 #Bar Charts
 source(file.path('bar_charts.R'), local = TRUE)  

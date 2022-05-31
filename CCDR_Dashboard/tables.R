@@ -39,8 +39,8 @@ observeEvent(input$table_domain, {
   if(input$table_domain == "Development Outcomes"){
     choices_ind_tab1 = data %>% 
       filter(domain == "Development Outcomes") %>% 
-      distinct(indicator) %>% 
-      pull(indicator)
+      distinct(indicator_1) %>% 
+      pull(indicator_1)
       
     updateSelectInput(
         getDefaultReactiveDomain(),
@@ -66,9 +66,9 @@ observeEvent(input$table_polygon,{
   if(input$table_polygon == "District" & input$table_domain == "Natural Hazards"){
   choices_haz_tab1 = data %>% 
     filter(domain == "Natural Hazards") %>% 
-    distinct(indicator) %>% 
+    distinct(indicator_1) %>% 
     slice_head(n=-3) %>% 
-    pull(indicator)
+    pull(indicator_1)
     updateSelectInput(
       getDefaultReactiveDomain(),
       "table_indicator",
@@ -77,9 +77,9 @@ observeEvent(input$table_polygon,{
   }else if(input$table_polygon == "Tehsil" & input$table_domain == "Natural Hazards") {
     choices_haz_tab2 = data %>% 
       filter(domain == "Natural Hazards") %>% 
-      distinct(indicator) %>% 
+      distinct(indicator_1) %>% 
       slice_tail(n=-3) %>% 
-      pull(indicator)
+      pull(indicator_1)
     updateSelectInput(
       getDefaultReactiveDomain(),
       "table_indicator",
@@ -88,8 +88,8 @@ observeEvent(input$table_polygon,{
   }else{
     choices_dev_tab2 = data %>% 
       filter(domain == "Development Outcomes") %>% 
-      distinct(indicator) %>% 
-      pull(indicator)
+      distinct(indicator_1) %>% 
+      pull(indicator_1)
     updateSelectInput(
       getDefaultReactiveDomain(),
       "table_indicator",
@@ -105,15 +105,15 @@ tables_climate <- reactive({
   data %>% 
     filter(province ==  input$table_province,
            polygon ==   input$table_polygon,
-           indicator == input$table_indicator) %>% 
-  select(province, district, domain, indicator, value, -polygon, -tehsil) %>% 
+           indicator_1 == input$table_indicator) %>% 
+  select(province, district, domain, indicator=indicator_1, value, unit, -polygon, -tehsil, -context,-source, -indicator) %>% 
   janitor::clean_names(case = "title") 
   }else{
     data %>% 
       filter(province ==  input$table_province,
              polygon ==   input$table_polygon,
-             indicator == input$table_indicator) %>% 
-      select(province, district, tehsil, domain, indicator, value, -polygon,) %>% 
+             indicator_1 == input$table_indicator) %>% 
+      select(province, district, tehsil, domain, indicator=indicator_1, value, unit, -polygon,-context,-source, -indicator) %>% 
       janitor::clean_names(case = "title") 
   }
 })
@@ -134,7 +134,7 @@ output$tables_main <- renderDataTable({
 #Download Tables
 output$downloadtable <- downloadHandler(
   filename = function(){
-    paste0("table_", glue("{ input$table_province }", "_", "{ input$table_indicator }"), ".csv")
+    paste0("table_", glue("{ input$table_province }", "_", "{ input$table_indicator_1 }"), ".csv")
   },
   content = function(file){
     write.csv(tables_climate(), file)
