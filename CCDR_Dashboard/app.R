@@ -20,7 +20,13 @@ library(shinydashboard)
 library(shinyWidgets)
 library(leafsync)
 library(highcharter)
+# remotes::install_github("Ebukin/devPTIpack")
+library(devPTIpack)
+library(maptools)
+library(gpclib)
+gpclibPermit()
 # library(broom)
+
 
 
 
@@ -30,6 +36,12 @@ library(highcharter)
 pak_shp <- readRDS("data/pak_shp.RDS")
 #Data Set
 data <- readRDS("data/data.RDS")
+
+#PTI Geometries
+pti_shps <-  readRDS("data/pak_geometries.rds") 
+
+#PTI Metadata
+pti_mtdt <- readRDS("data/pak_metadata_climate.RDS")
 
 
 #Socio-Economic Indicators List
@@ -116,6 +128,16 @@ ui <- navbarPage("CLIMATE Dashboard",
                                       # br(),
                           )
                  ),
+                 tabPanel("PTI",
+                          devPTIpack::mod_ptipage_twocol_ui(
+                            id = "pti_mod", 
+                            map_height = "calc(90vh)", 
+                            side_width = "350px", 
+                            wt_style = "zoom:1;", 
+                            show_waiter = FALSE,
+                            wt_dwnld_options = c("data", "weights"),
+                            map_dwnld_options = c())
+                          ),
                  tabPanel("COMPARISON MAPS",
                           sidebarLayout(
                             sidebarPanel(
@@ -339,6 +361,17 @@ source(file.path('bar_charts.R'), local = TRUE)
 ################################################################################
 #Main Tables
 source(file.path("tables.R"), local = TRUE)  
+
+################################################################################
+################################################################################
+#PTI Server Side
+  mod_ptipage_newsrv(
+    id = "pti_mod",
+    inp_dta = reactive(pti_mtdt),
+    shp_dta = reactive(pti_shps),
+    show_waiter = FALSE
+
+  )
 }
 ################################################################################
 

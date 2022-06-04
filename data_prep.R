@@ -1,11 +1,13 @@
 #Utils
 library(readr)
 library(dplyr)
+library(purrr)
 library(sf)
 library(stringr)
 library(glue)
 library(janitor)
 library(rio)
+library(readxl)
 
 rm(list=ls())
 
@@ -24,6 +26,7 @@ district_shp <-  read_sf("data/shapefile_district/pakistan_indicators.shp") %>%
   arrange(district) %>% 
   st_transform(crs=4326) %>% 
   mutate(polygon = "district")
+
 
 #Teshil Shape File
 
@@ -294,5 +297,62 @@ data %>%
 
 pak_shp <- list(District = district_shp, Tehsil = tehsil_shp)
 pak_shp %>% write_rds("CCDR_Dashboard/data/pak_shp.RDS")
+
+################################################################################
+###Metadata for PTI
+metadata_climate <- import_list("data/pak_metadata_climate.xlsx")
+metadata_climate %>% 
+  write_rds("CCDR_Dashboard/data/pak_metadata_climate.RDS")
+################################################################################
+#PTI Shapefile preparation
+
+nums1 <- seq(1:9)
+nums1 <- paste0(0, nums1)
+
+nums2 <- as.character(seq(10,131)) 
+
+#Concatinating together
+nums <- c(nums1, nums2)
+
+pak_shp_district_PTI <- st_read("data/shapefile_district/pakistan_indicators.shp") %>% 
+  st_as_sf() %>% 
+  clean_names() %>% 
+  select(year, province, district, geometry) %>% 
+  filter(year==2018) %>% 
+  arrange(district) %>% 
+  rename(admin1Name = district)  %>% 
+  mutate(admin1Pcod = paste0("Pakistan", nums)) %>% 
+  mutate(admin0Pcod = "Pakistan") %>% 
+  select(admin0Pcod, admin1Pcod, admin1Name, geometry)
+
+#Making a List
+pak_shp <- list(admin1_District = pak_shp_district_PTI)
+
+pak_shp <- 
+  pak_shp %>% 
+  map(~{.x %>% st_transform("+proj=longlat +datum=WGS84")})
+
+## https://stackoverflow.com/questions/68478179/how-to-resolve-spherical-geometry-failures-when-joining-spatial-data
+sf_use_s2(FALSE)
+
+pak_shp$admin0_Country <-
+  pak_shp$admin1_District %>% 
+  group_by(admin0Pcod) %>% 
+  summarise() %>% 
+  mutate(admin0Name = "Pakistan") %>% 
+  st_make_valid()
+
+
+pti_shps <- NULL
+pti_shps$admin0_Country  <- pak_shp$admin0_Country 
+pti_shps$admin1_District <- pak_shp$admin1_District
+
+
+pti_shps %>% write_rds("CCDR_Dashboard/data/pak_geometries.rds", compress = "gz")
+
+pti_shps$admin0_Country %>% st_crs()
+pti_shps$admin1_District %>% st_crs()
+
+validate_geometries(pti_shps)
 ################################################################################
 
