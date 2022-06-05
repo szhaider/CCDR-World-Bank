@@ -8,8 +8,8 @@ observeEvent(input$help_comp, {
     p("These maps offer comparison (spatial correlation) between selected CCDR-Pakistan indicators"),
     # p("MAP1 refers to"),
     p("These maps give district level estimates of CCDR-Pakistan indicators over the selected filters"),
-    p("All Development Indicators are rounded to 2 decimal points"),
-    p("All Natural Hazards Indicators are rounded to 3 decimal points"),
+    p("All indicators are rounded to 2 decimal points"),
+    # p("All Natural Hazards Indicators are rounded to 3 decimal points"),
     p("Expect the color mapping to reverse with the context of  the selected indicators - e.g. Poverty (High) = Red whereas; Access to improved toilet facilities (High) = Blue"),
     size = "m", easyClose = TRUE, fade=FALSE,footer = modalButton("Close (Esc)")))
 })
@@ -181,7 +181,7 @@ comp_map1 <- reactive({
               values= ~map_data1()$value,
               title = 
                 if(unique(map_data1()$unit) != ""){
-                  glue("Legend", " ", "({ unique(map_data1()$unit)  })")
+                  glue("Legend", " ", "{ unique(map_data1()$unit)  }")
                 }else{
                   "Legend"
                 },
@@ -258,7 +258,7 @@ observeEvent(input$domain_map2,{
     
     updateSelectizeInput(
       getDefaultReactiveDomain(),
-      "polygon_map1",
+      "polygon_map2",
       choices = choices_pol_c4)
   }
 })
@@ -354,7 +354,7 @@ comp_map2 <- reactive({
               values= ~map_data2()$value,
               title = 
                 if(unique(map_data2()$unit) != ""){
-                  glue("Legend", " ", "({ unique(map_data2()$unit)  })")
+                  glue("Legend", " ", "{ unique(map_data2()$unit)  }")
                 }else{
                   "Legend"
                 },

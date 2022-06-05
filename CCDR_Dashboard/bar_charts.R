@@ -7,8 +7,8 @@ observeEvent(input$help_bar, {
     title = "How to use these bar charts",
     p("These interactive bar charts give district and tehsil level estimates of CCDR-Pakistan indicators for the selected province"), 
     p("Tehsil level estimates are available only for natural hazards"),
-    p("All Development Indicators are rounded to 2 decimal points"),
-    p("All Natural Hazards Indicators are rounded to 4 decimal points"),
+    p("All indicators are rounded to 2 decimal points"),
+    # p("All Natural Hazards Indicators are rounded to 4 decimal points"),
       size = "m", easyClose = TRUE, fade=FALSE,footer = modalButton("Close (Esc)")))
 })
 

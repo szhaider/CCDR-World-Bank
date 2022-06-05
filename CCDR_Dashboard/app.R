@@ -203,7 +203,7 @@ ui <- navbarPage("CLIMATE Dashboard",
                                           choices = hazards_options,
                                           selectize = F),
                              
-                              actionButton("screenshot_comp", "Image",class="btn-sm", icon = icon("camera")),
+                              # actionButton("screenshot_comp", "Image",class="btn-sm", icon = icon("camera")),
                               # actionButton("help_comp", "Help", icon= icon('question-circle'), class ="btn-sm"),
                             ),
                           

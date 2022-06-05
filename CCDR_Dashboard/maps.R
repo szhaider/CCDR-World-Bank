@@ -6,8 +6,8 @@ observeEvent(input$help_map, {
   showModal(modalDialog(
     title = "How to use these maps",
     p("These maps give district level estimates of CCDR-Pakistan indicators over the selected filters"),
-    p("All Development Indicators are rounded to 2 decimal points"),
-    p("All Natural Hazards Indicators are rounded to 3 decimal points"),
+    p("All indicators are rounded to 2 decimal points"),
+    # p("All Natural Hazards Indicators are rounded to 3 decimal points"),
     p("Expect the color mapping to reverse with the context of  the selected indicators - e.g. Poverty (High) = Red whereas; Access to improved toilet facilities (High) = Blue"),
     size = "m", easyClose = TRUE, fade=FALSE,footer = modalButton("Close (Esc)")))
 })
@@ -178,7 +178,7 @@ main_map <- reactive({
               values= ~map_data()$value,
               title = 
                 if(unique(map_data()$unit) != ""){
-                glue("Legend", " ", "({ unique(map_data()$unit)  })")
+                glue("Legend", " ", "{ unique(map_data()$unit)  }")
                   }else{
                     "Legend"
                   },

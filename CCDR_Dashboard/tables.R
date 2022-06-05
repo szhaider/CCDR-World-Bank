@@ -9,8 +9,8 @@ observeEvent(input$help_tables, {
     title = "How to use these tables",
     p("These tables give district and tehsil level estimates of selected CCDR indicators in each province"), 
     p("Tehsil level estimates are available only for natural hazards"),
-    p("All the development indicators are rounded-off to 2 decimal points"),
-    p("All the natural hazards indicators are rounded-off to 4 decimal points"),
+    p("All indicators are rounded-off to 2 decimal points"),
+    # p("All the natural hazards indicators are rounded-off to 4 decimal points"),
     size = "m", easyClose = TRUE, fade=FALSE,footer = modalButton("Close (Esc)")))
 })
 

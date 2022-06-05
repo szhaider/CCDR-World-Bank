@@ -10,6 +10,7 @@ library(janitor)
 library(rio)
 library(readxl)
 library(devPTIpack)
+library(stringr)
 
 rm(list=ls())
 
@@ -52,7 +53,11 @@ hazards_district <- natural_hazards[["PAK_District_SUMMARY"]] %>%
   mutate(dist_population = dist_population/1000) %>% 
   pivot_longer(dist_population:`AP_pop_EAI%` ,names_to = "indicator", values_to = "value") %>% 
   mutate(polygon = "District") %>% 
-  arrange(district)
+  arrange(district) %>% 
+  mutate(value = case_when(
+    indicator = str_detect(indicator, "%") ~ value*100,
+    TRUE ~ value
+  ))
 
 hazards_tehsil <- natural_hazards[["PAK_Tehsil_SUMMARY"]]%>% 
   as_tibble() %>% 
@@ -78,7 +83,11 @@ hazards_tehsil <- hazards_tehsil %>%
 hazards_tehsil <- hazards_tehsil %>% 
   pivot_longer(tehsil_poplation:`AP_pop_EAI%` ,names_to = "indicator", values_to = "value") %>% 
   mutate(polygon = "Tehsil") %>% 
-  arrange(tehsil)
+  arrange(tehsil)%>% 
+  mutate(value = case_when(
+    indicator = str_detect(indicator, "%") ~ value*100,
+    TRUE ~ value
+  ))
 
 hazards <- bind_rows(hazards_district, hazards_tehsil) %>% 
   mutate(domain = "Natural Hazards")
@@ -255,7 +264,7 @@ data <- hazards %>%
   mutate(value = 
            case_when(
           domain == "Development Outcomes" ~ round(value, 2),
-          domain == "Natural Hazards" ~ round(value, 4)
+          domain == "Natural Hazards" ~ round(value, 2)
           )
   )
 

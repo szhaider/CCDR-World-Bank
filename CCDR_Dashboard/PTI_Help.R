@@ -12,7 +12,7 @@ output$text <- renderPrint({
       p(tags$strong("What is PTI?")),
       p("PTI is a composite index - which can be used to identify areas in the country that need to be prioritized based on a data driven criteria"),
       p("PTI = z-scores calculated based on selected indicators and assigned weights"),
-      p("z-score of indicator i:  z_i = (y_i - mean(y_i))/sd(y_i))"),
+      p("z-score of indicator i:  z_i = (y_i - mean(y_i))/sd(y_i)"),
       p("Then computing the weighted sum of all indicators assigned"),
       p("Sigma_{i}[z_i * wt_i]; where wt_i is a weight assigned to indicator i"),
       p(tags$b("Higher value gets higher PTI score, thus higher importance for geographic targeting")),
