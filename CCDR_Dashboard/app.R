@@ -80,13 +80,15 @@ ui <- navbarPage("CLIMATE Dashboard",
                  #   useShinydashboard()
                  # ),
                  tabPanel("INTERACTIVE MAPS",
+                          
                           # bootstrapPage(),
                           # tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
                           tags$style(type = 'text/css', '#maps {height: calc(98vh - 100px) !important;}', style= 'padding-top:0px;'),
                           leafletOutput("maps") %>%
-                            withSpinner(),
-                          # br(),
+                          withSpinner(),
+                          
                           tags$head(tags$style("#source_map{color:black; font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
+                          
                           verbatimTextOutput("source_map"),
                           
                           absolutePanel(id = "controls", class = "panel panel-default", fixed= TRUE,
@@ -129,15 +131,30 @@ ui <- navbarPage("CLIMATE Dashboard",
                           )
                  ),
                  tabPanel("PTI",
+                 tabsetPanel(id = "pti_help",
+                             type = c("hidden"),
+                             # selected ="PTI1" ,
+                             
+                 tabPanel("PTI1", 
+                          id="PTI1", 
+                         
                           devPTIpack::mod_ptipage_twocol_ui(
                             id = "pti_mod", 
                             map_height = "calc(90vh)", 
                             side_width = "350px", 
-                            wt_style = "zoom:1;", 
+                             wt_style = "zoom:1;", 
                             show_waiter = FALSE,
                             wt_dwnld_options = c("data", "weights"),
-                            map_dwnld_options = c())
-                          ),
+                            map_dwnld_options = c()),
+                          
+                          mainPanel(
+                            verbatimTextOutput("text"),
+                          )
+                          
+                 )
+                 
+                 )
+                 ),
                  tabPanel("COMPARISON MAPS",
                           sidebarLayout(
                             sidebarPanel(
@@ -192,22 +209,32 @@ ui <- navbarPage("CLIMATE Dashboard",
                           
                             mainPanel(
                               width = 9,
-                              uiOutput("double_map") %>% 
-                                withSpinner(),
-                              br(),
-                              br(),
+                              fluidRow(
+                                column(width = 12,
+                                       offset = 0,
+                                       style = 'padding-bottom:0px; padding-left:0px; padding-right:0px',
+                                       tags$style(type = 'text/css', '#double_map {height: calc(60vh - 60px) !important;}'),
+                              uiOutput("double_map") %>%
+                              withSpinner()
+                              )),
+                              # br(),
+                              # br(),
                               fluidRow(
                                 column(6,
                                        offset = 0.5,
-                                       style = 'padding:1px;',   
-                                       tags$head(tags$style("#source_comp1{color:black; font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
+                                       style =
+                                       "padding-top: 1mm;
+                                        padding-left: 0mm;",
+                                       tags$head(tags$style("#source_comp1{color:black;  font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
                                        verbatimTextOutput("source_comp1")),
-                                column(6, 
+                                column(6,
                                        offset = 0,
-                                       style = 'padding-left:0px;',
+                                       style = 
+                                      "padding-top:1mm;   
+                                       padding-left:1px;",
                                        tags$head(tags$style("#source_comp2{color:black; font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
                                        verbatimTextOutput("source_comp2")
-                                       
+
                                 ))
                             )
                             )
@@ -336,9 +363,55 @@ ui <- navbarPage("CLIMATE Dashboard",
                  ),
                  tabPanel("ABOUT",
                           mainPanel(
+                            width = 12,
+                            
+                            
+tags$p(tags$strong(h4("CLIMATE DASHBOARD"))),
+hr(),
+tags$p(tags$b("Pakistan is currently among the countries most affected by extreme weather events globally."),
+"The long-term Climate Risk Index (CRI) ranks Pakistan as the 8th most at-risk country over 
+the 2000-2019 period, with 173 extreme events recorded (CRI 2021). Global climate projections 
+of temperature and precipitation, compounded by the degradation of the environment, due to land use 
+patterns and unplanned urban development, indicate that", tags$b("even under the most optimistic global climate 
+scenario, Pakistan will continue to disproportionally – and more frequently and 
+intensely – suffer "), "from extreme weather events and long-term climatic changes."  ) , 
+
+tags$p(tags$b("However, disaster risk is not uniform across space."), 
+"It is a function of the probability and intensity with 
+which a hazard occurs, and the exposure of people and assets to this hazard, both of which differ strongly across
+geographies. Moreover, socioeconomic conditions, driving vulnerability, are also highly heterogenous at small scales, 
+making communities and households more, or less, vulnerable in the face of climate change. The analytics in this 
+dashboard", tags$b("zoom in to the level of granular administrative units, where investment decisions are made and local policy 
+should be targeted.")),
+
+tags$p(tags$b("This dashboard focuses on disaster risk from floods, heat stress, droughts, landslides, 
+       and air pollution."), "These pose a critical environmental concern for Pakistan, and indeed 
+       across large parts of South Asia. To assess and quantify the impact of these hazards, 
+       whether extreme events or long-term climatic changes, 
+       we look at", tags$b("three types of exposure: (1) population, 
+       (2) built-up assets, and (3) agricultural land."), 
+       "Where available, an impact function is added to the exposure variables, 
+       to demonstrate the expected annual impact on population health in terms 
+       of morbidity and mortality, the potential damage to built-up assets and to 
+       agricultural land. Vulnerability is then captured by a series of", 
+       tags$b("socioeconomic indicators and development outcomes, tailored to specific hazards."),
+       tags$hr(),
+       
+       tags$p(tags$em("For further information and questions or suggestions, please reach out to:")),
+       
+       tags$p("Ghazala Mansuri, Lead Economist, ESAPV -",  tags$a("gmansuri@worldbank.org")),
+       tags$p("Moritz Meyer, Senior Economist, ESAPV -",   tags$a("mmeyer3@worldbank.org")),
+       tags$p("Lander Bosch, Regional Geographer/YP -",    tags$a("lbosch@worldbank.org")),
+       tags$p("Mattia Amadio, Research Analyst -",         tags$a("mamadio@worldbank.org")),
+       tags$p("Henrik Fisser, Research Analyst –",        tags$a("ghfisser@worldbank.org")),
+       tags$p("Vincent Mariathanasan, Research Analyst -", tags$a("vmariathanasan@worldbank.org")),
+       tags$p("Maham Khan, Research Analyst -",            tags$a("mkhan57@worldbank.org")),
+       tags$p("Zeeshan Haider, Research Analyst -",        tags$a("shaider7@worldbank.org")),
+
                             
                           )
                           )
+)
 )
                  
 
@@ -348,10 +421,14 @@ ui <- navbarPage("CLIMATE Dashboard",
 ################################################################################
 ################################################################################
 server <- function(input, output, session) {
-
+################################################################################
+#Main Landing page  
+# source(file.path("main_landing_page.R"), local = TRUE)  
 ################################################################################
 #Main Maps
 source(file.path("maps.R"), local = TRUE)
+################################################################################
+  
 ################################################################################
 #Comparison Maps
 source(file.path("comparison_maps.R"), local = TRUE)  
@@ -364,6 +441,28 @@ source(file.path("tables.R"), local = TRUE)
 
 ################################################################################
 ################################################################################
+  #PTI Help
+  output$text <- renderPrint({
+    observeEvent(input$pti_help, {
+      showModal(modalDialog(
+        title = tags$strong("Project Targeting Index (PTI)"),
+        p(tags$em("Steps to calculate and render PTI scores")),
+        p(tags$b("Step 1:"), "Name your PTI e.g. Test1"),
+        p(tags$b("Step 2:"), "Assign weights to the desired indicators of the respective domains - User can select 'All 1' or 'All 0' for ease"),
+        p(tags$b("Step 3:"), "Click 'Save and plot PTI' to render PTI scores on the map"),
+        tags$hr(),
+        p(tags$strong("What is PTI?")),
+        p("PTI = z-scores calculated based on selected indicators and assigned weights"),
+        p("z-score of indicator i:  z_i = (y_i – mean(y_i))/sd(y_i))"),
+        p("Then computing the weighted sum of all indicators assigned"),
+        p("Sigma_{i}[z_i * wt_i] where wt_i is a weight assigned to indicator i"),
+        p("Higher value gets higher PTI score, thus higher importance for geographic targeting"),
+        p(tags$b("Note:"), "User should use negative weights (e.g. -1) for indicators like 'Housing with improved roof and wall material (PSLM 2014)' to reverse priority order")
+        ))
+    })
+  })
+# source(file.path("PTI_Help.R"), local= TRUE)
+  
 #PTI Server Side
   mod_ptipage_newsrv(
     id = "pti_mod",

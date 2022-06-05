@@ -5,9 +5,10 @@
 observeEvent(input$help_bar, {
   showModal(modalDialog(
     title = "How to use these bar charts",
-    p("These interactive bar charts give district level estimates of CCDR-Pakistan indicators for the selected province"), 
+    p("These interactive bar charts give district and tehsil level estimates of CCDR-Pakistan indicators for the selected province"), 
+    p("Tehsil level estimates are available only for natural hazards"),
     p("All Development Indicators are rounded to 2 decimal points"),
-    p("All Natural Hazards Indicators are rounded to 3 decimal points"),
+    p("All Natural Hazards Indicators are rounded to 4 decimal points"),
       size = "m", easyClose = TRUE, fade=FALSE,footer = modalButton("Close (Esc)")))
 })
 
@@ -65,7 +66,8 @@ data %>%
         polygon == input$polygon_bar, 
         province == input$province_bar,
         domain == input$domain_bar,
-        indicator_1 == input$indicator_bar) %>% 
+        indicator_1 == input$indicator_bar,
+        !is.na(value)) %>% 
     arrange(desc(value))
 }
 
@@ -116,7 +118,7 @@ output$labels_bar <- renderText({
     distinct(unit) %>% 
     pull(unit)
   })
-  paste0("Unit: ", unit_bar())
+  paste("Units: ", unit_bar())
 })
 
 

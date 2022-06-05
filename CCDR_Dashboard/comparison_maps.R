@@ -368,7 +368,7 @@ output$double_map <- renderUI({
   sync(comp_map1(), comp_map2(), ncol=2, no.initial.sync = T)
 })    
 
-#Source Map1
+#Source Map1  
 output$source_comp1 <- renderText({
   paste0("MAP 1", "\n", 
          "Source: CCDR-Pakistan"

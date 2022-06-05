@@ -7,8 +7,10 @@
 observeEvent(input$help_tables, {
   showModal(modalDialog(
     title = "How to use these tables",
-    p("These tables give district level estimates of selected CCDR indicators in each province"), 
-    p("All the values are rounded to 2 decimal points"),
+    p("These tables give district and tehsil level estimates of selected CCDR indicators in each province"), 
+    p("Tehsil level estimates are available only for natural hazards"),
+    p("All the development indicators are rounded-off to 2 decimal points"),
+    p("All the natural hazards indicators are rounded-off to 4 decimal points"),
     size = "m", easyClose = TRUE, fade=FALSE,footer = modalButton("Close (Esc)")))
 })
 
@@ -50,8 +52,8 @@ observeEvent(input$table_domain, {
   }else{
     choices_ind_tab2 = data %>% 
       filter(domain == "Natural Hazards") %>% 
-      distinct(indicator) %>% 
-      pull(indicator)
+      distinct(indicator_1) %>% 
+      pull(indicator_1)
     
     updateSelectInput(
       getDefaultReactiveDomain(),
@@ -105,14 +107,16 @@ tables_climate <- reactive({
   data %>% 
     filter(province ==  input$table_province,
            polygon ==   input$table_polygon,
-           indicator_1 == input$table_indicator) %>% 
+           indicator_1 == input$table_indicator,
+           !is.na(value)) %>% 
   select(province, district, domain, indicator=indicator_1, value, unit, -polygon, -tehsil, -context,-source, -indicator) %>% 
   janitor::clean_names(case = "title") 
   }else{
     data %>% 
       filter(province ==  input$table_province,
              polygon ==   input$table_polygon,
-             indicator_1 == input$table_indicator) %>% 
+             indicator_1 == input$table_indicator,
+             !is.na(value)) %>% 
       select(province, district, tehsil, domain, indicator=indicator_1, value, unit, -polygon,-context,-source, -indicator) %>% 
       janitor::clean_names(case = "title") 
   }
@@ -134,7 +138,7 @@ output$tables_main <- renderDataTable({
 #Download Tables
 output$downloadtable <- downloadHandler(
   filename = function(){
-    paste0("table_", glue("{ input$table_province }", "_", "{ input$table_indicator_1 }"), ".csv")
+    paste0("Table_", input$table_province , "_", input$table_indicator, ".csv")
   },
   content = function(file){
     write.csv(tables_climate(), file)
