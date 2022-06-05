@@ -118,7 +118,7 @@ output$labels_bar <- renderText({
     distinct(unit) %>% 
     pull(unit)
   })
-  paste("Units: ", unit_bar())
+  paste0("Units: ", unit_bar())
 })
 
 

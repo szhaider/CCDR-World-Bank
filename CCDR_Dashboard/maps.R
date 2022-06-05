@@ -8,7 +8,7 @@ observeEvent(input$help_map, {
     p("These maps give district level estimates of CCDR-Pakistan indicators over the selected filters"),
     p("All Development Indicators are rounded to 2 decimal points"),
     p("All Natural Hazards Indicators are rounded to 3 decimal points"),
-    p("Expect the color mapping to change with the context of  the selected indicators - e.g. Poverty (High) = Red whereas; Access to improved toilet facilities (High) = Blue"),
+    p("Expect the color mapping to reverse with the context of  the selected indicators - e.g. Poverty (High) = Red whereas; Access to improved toilet facilities (High) = Blue"),
     size = "m", easyClose = TRUE, fade=FALSE,footer = modalButton("Close (Esc)")))
 })
 
@@ -94,13 +94,13 @@ observeEvent(input$domain_map,{
 
 labels_map <- reactive({
 if(input$domain_map == "Development Outcomes"){  
-    paste0(glue::glue("<b>District</b>: { pak_shp1()$district } </br>"), glue::glue("<b> { map_data()$indicator_1 }: </b>"), " ", glue::glue("{ round(map_data()$value, 2)  }"), " ", glue::glue("({ map_data()$unit })"), sep = "") %>% 
+    paste0(glue::glue("<b>District</b>: { pak_shp1()$district } </br>"), glue::glue("<b> { map_data()$indicator_1 }: </b>"), " ", glue::glue("{ round(map_data()$value, 2)  }"), " ", glue::glue("{ map_data()$unit }"), sep = "") %>% 
       lapply(htmltools::HTML) 
 }else if(input$polygon_map == "Tehsil" & input$domain_map == "Natural Hazards"){
-  paste0(glue::glue("<b>Tehsil</b>: { pak_shp1()$tehsil } </br>"), glue::glue("<b> { map_data()$indicator_1 }: </b>"), " ", glue::glue("{ round(map_data()$value, 3) }"), " ", glue::glue("({ map_data()$unit })"),  sep = "") %>% 
+  paste0(glue::glue("<b>Tehsil</b>: { pak_shp1()$tehsil } </br>"), glue::glue("<b> { map_data()$indicator_1 }: </b>"), " ", glue::glue("{ round(map_data()$value, 3) }"), " ", glue::glue("{ map_data()$unit }"),  sep = "") %>% 
     lapply(htmltools::HTML) 
 }else if(input$polygon_map == "District" & input$domain_map == "Natural Hazards"){
-  paste0(glue::glue("<b>District</b>: { pak_shp1()$district } </br>"), glue::glue("<b> { map_data()$indicator_1 }: </b>"), " ", glue::glue("{ round(map_data()$value, 3) }"), " ", glue::glue("({ map_data()$unit })"), sep = "") %>% 
+  paste0(glue::glue("<b>District</b>: { pak_shp1()$district } </br>"), glue::glue("<b> { map_data()$indicator_1 }: </b>"), " ", glue::glue("{ round(map_data()$value, 3) }"), " ", glue::glue("{ map_data()$unit }"), sep = "") %>% 
     lapply(htmltools::HTML) 
 }
 })
@@ -148,8 +148,9 @@ main_map <- reactive({
                   style = list("font-weight"= "normal",   
                                padding= "3px 8px",
                                "color"= "black"), 
-                  textsize= "15px",
-                  direction = "auto"
+                  textsize= "12px",
+                  direction = "auto", 
+                  
                 ),
                 fillColor =  ~pal()(map_data()$value),
                 fillOpacity = 1,

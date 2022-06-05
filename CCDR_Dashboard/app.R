@@ -81,12 +81,12 @@ ui <- navbarPage("CLIMATE Dashboard",
                  # ),
                  tabPanel("INTERACTIVE MAPS",
                           
-                          # bootstrapPage(),
+                          # bootstrapPage(theme = shinytheme("flatly")),
                           # tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
                           tags$style(type = 'text/css', '#maps {height: calc(98vh - 100px) !important;}', style= 'padding-top:0px;'),
                           leafletOutput("maps") %>%
                           withSpinner(),
-                          
+                          br(),
                           tags$head(tags$style("#source_map{color:black; font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
                           
                           verbatimTextOutput("source_map"),
@@ -203,8 +203,8 @@ ui <- navbarPage("CLIMATE Dashboard",
                                           choices = hazards_options,
                                           selectize = F),
                              
-                              # actionButton("screenshot_comp", "Screenshot",class="btn-sm", icon = icon("camera")),
-                              actionButton("help_comp", "Help", icon= icon('question-circle'), class ="btn-sm"),
+                              actionButton("screenshot_comp", "Image",class="btn-sm", icon = icon("camera")),
+                              # actionButton("help_comp", "Help", icon= icon('question-circle'), class ="btn-sm"),
                             ),
                           
                             mainPanel(
@@ -397,16 +397,16 @@ tags$p(tags$b("This dashboard focuses on disaster risk from floods, heat stress,
        tags$b("socioeconomic indicators and development outcomes, tailored to specific hazards."),
        tags$hr(),
        
-       tags$p(tags$em("For further information and questions or suggestions, please reach out to:")),
+       tags$p(tags$em(tags$b("For further information and questions or suggestions, please reach out to:"))),
        
-       tags$p("Ghazala Mansuri, Lead Economist, ESAPV -",  tags$a("gmansuri@worldbank.org")),
-       tags$p("Moritz Meyer, Senior Economist, ESAPV -",   tags$a("mmeyer3@worldbank.org")),
-       tags$p("Lander Bosch, Regional Geographer/YP -",    tags$a("lbosch@worldbank.org")),
-       tags$p("Mattia Amadio, Research Analyst -",         tags$a("mamadio@worldbank.org")),
-       tags$p("Henrik Fisser, Research Analyst –",        tags$a("ghfisser@worldbank.org")),
-       tags$p("Vincent Mariathanasan, Research Analyst -", tags$a("vmariathanasan@worldbank.org")),
-       tags$p("Maham Khan, Research Analyst -",            tags$a("mkhan57@worldbank.org")),
-       tags$p("Zeeshan Haider, Research Analyst -",        tags$a("shaider7@worldbank.org")),
+       tags$p("Ghazala Mansuri, Lead Economist, ESAPV  -",  tags$a("gmansuri@worldbank.org")),
+       tags$p("Moritz Meyer, Senior Economist, ESAPV   -",  tags$a("mmeyer3@worldbank.org")),
+       tags$p("Lander Bosch, Regional Geographer/YP    -",  tags$a("lbosch@worldbank.org")),
+       tags$p("Mattia Amadio, Research Analyst         -",  tags$a("mamadio@worldbank.org")),
+       tags$p("Henrik Fisser, Research Analyst         -",  tags$a("ghfisser@worldbank.org")),
+       tags$p("Vincent Mariathanasan, Research Analyst -",  tags$a("vmariathanasan@worldbank.org")),
+       tags$p("Maham Khan, Research Analyst            -",  tags$a("mkhan57@worldbank.org")),
+       tags$p("Zeeshan Haider, Research Analyst        -",  tags$a("shaider7@worldbank.org")),
 
                             
                           )
@@ -441,28 +441,8 @@ source(file.path("tables.R"), local = TRUE)
 
 ################################################################################
 ################################################################################
-  #PTI Help
-  output$text <- renderPrint({
-    observeEvent(input$pti_help, {
-      showModal(modalDialog(
-        title = tags$strong("Project Targeting Index (PTI)"),
-        p(tags$em("Steps to calculate and render PTI scores")),
-        p(tags$b("Step 1:"), "Name your PTI e.g. Test1"),
-        p(tags$b("Step 2:"), "Assign weights to the desired indicators of the respective domains - User can select 'All 1' or 'All 0' for ease"),
-        p(tags$b("Step 3:"), "Click 'Save and plot PTI' to render PTI scores on the map"),
-        tags$hr(),
-        p(tags$strong("What is PTI?")),
-        p("PTI = z-scores calculated based on selected indicators and assigned weights"),
-        p("z-score of indicator i:  z_i = (y_i – mean(y_i))/sd(y_i))"),
-        p("Then computing the weighted sum of all indicators assigned"),
-        p("Sigma_{i}[z_i * wt_i] where wt_i is a weight assigned to indicator i"),
-        p("Higher value gets higher PTI score, thus higher importance for geographic targeting"),
-        p(tags$b("Note:"), "User should use negative weights (e.g. -1) for indicators like 'Housing with improved roof and wall material (PSLM 2014)' to reverse priority order")
-        ))
-    })
-  })
-# source(file.path("PTI_Help.R"), local= TRUE)
-  
+#PTI Help
+source(file.path("PTI_Help.R"), local= TRUE)
 #PTI Server Side
   mod_ptipage_newsrv(
     id = "pti_mod",

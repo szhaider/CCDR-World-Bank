@@ -10,7 +10,7 @@ observeEvent(input$help_comp, {
     p("These maps give district level estimates of CCDR-Pakistan indicators over the selected filters"),
     p("All Development Indicators are rounded to 2 decimal points"),
     p("All Natural Hazards Indicators are rounded to 3 decimal points"),
-    p("Expect the color mapping to change with the context of  the selected indicators - e.g. Poverty (High) = Red whereas; Access to improved toilet facilities (High) = Blue"),
+    p("Expect the color mapping to reverse with the context of  the selected indicators - e.g. Poverty (High) = Red whereas; Access to improved toilet facilities (High) = Blue"),
     size = "m", easyClose = TRUE, fade=FALSE,footer = modalButton("Close (Esc)")))
 })
 
@@ -152,7 +152,7 @@ comp_map1 <- reactive({
                   style = list("font-weight"= "normal",   
                                padding= "3px 8px",
                                "color"= "black"), 
-                  textsize= "15px",
+                  textsize= "10px",
                   direction = "auto"
                 ),
                 fillColor =  ~pal1()(map_data1()$value),
@@ -325,7 +325,7 @@ comp_map2 <- reactive({
                   style = list("font-weight"= "normal",   
                                padding= "3px 8px",
                                "color"= "black"), 
-                  textsize= "15px",
+                  textsize= "10px",
                   direction = "auto"
                 ),
                 fillColor =  ~pal2()(map_data2()$value),
