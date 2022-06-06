@@ -10,7 +10,7 @@ output$text <- renderPrint({
       p(tags$b("Step 3:"), "Click 'Save and plot PTI' to render PTI scores on the map"),
       tags$hr(),
       p(tags$strong("What is PTI?")),
-      p("PTI is a composite index - which can be used to identify areas in the country that need to be prioritized based on a data driven criteria"),
+      p("PTI is a composite index - which can be used to identify areas in the country that need to be prioritized based on a data driven criterion"),
       p("PTI = z-scores calculated based on selected indicators and assigned weights"),
       p("z-score of indicator i:  z_i = (y_i - mean(y_i))/sd(y_i)"),
       p("Then computing the weighted sum of all indicators assigned"),

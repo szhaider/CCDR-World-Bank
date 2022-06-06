@@ -25,6 +25,7 @@ library(devPTIpack)
 library(maptools)
 library(gpclib)
 gpclibPermit()
+library(waiter)
 # library(broom)
 
 
@@ -74,18 +75,39 @@ spatial_level <- unique(data$polygon)
 
 #User Interface
 ################################################################################
-ui <- navbarPage("CLIMATE Dashboard",
-                 
+ui <- function(request){
+         
+                 tagList(
+                   waiter_show_on_load(html = spin_loaders(10)),
+                   # br(),
+                 )
+  
+  navbarPage("CLIMATE Dashboard",
+                 tags$style(type="text/css",
+                            ".shiny-output-error { visibility: hidden; }",
+                            ".shiny-output-error:before { visibility: hidden; }"
+                 ),
                   # header= tagList(
                  #   useShinydashboard()
                  # ),
                  tabPanel("INTERACTIVE MAPS",
-                          
+                          tabsetPanel(id = "main_page",
+                                      type = c("hidden"),
+                                      # selected ="PTI1" ,
+                                      
+                                      tabPanel("main_page1", 
+                                               id="main_page1", 
                           # bootstrapPage(theme = shinytheme("flatly")),
                           # tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
+                          
+                          # use_waiter(),
+                          # waiter_show_on_load(html = spin_loaders(10)),
+                          
+                          
                           tags$style(type = 'text/css', '#maps {height: calc(98vh - 100px) !important;}', style= 'padding-top:0px;'),
-                          leafletOutput("maps") %>%
-                          withSpinner(),
+                          leafletOutput("maps"),
+                           # withSpinner(),
+                            
                           br(),
                           tags$head(tags$style("#source_map{color:black; font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
                           
@@ -93,7 +115,7 @@ ui <- navbarPage("CLIMATE Dashboard",
                           
                           absolutePanel(id = "controls", class = "panel panel-default", fixed= TRUE,
                                         draggable = TRUE, bottom = "auto", right = "auto", left = 70, top = 80,
-                                        width = 250, height = "auto",
+                                        width = 280, height = "auto",
                                         style = "background-color: white;
                                                    opacity: 0.85;
                                                    padding: 20px 20px 20px 20px;
@@ -129,7 +151,7 @@ ui <- navbarPage("CLIMATE Dashboard",
                                       br(),
                                       # br(),
                           )
-                 ),
+                 ))),
                  tabPanel("PTI",
                  tabsetPanel(id = "pti_help",
                              type = c("hidden"),
@@ -203,8 +225,8 @@ ui <- navbarPage("CLIMATE Dashboard",
                                           choices = hazards_options,
                                           selectize = F),
                              
-                              # actionButton("screenshot_comp", "Image",class="btn-sm", icon = icon("camera")),
-                              # actionButton("help_comp", "Help", icon= icon('question-circle'), class ="btn-sm"),
+                               actionButton("screenshot_comp", "Image",class="btn-sm", icon = icon("camera")),
+                               actionButton("help_comp", "Help", icon= icon('question-circle'), class ="btn-sm"),
                             ),
                           
                             mainPanel(
@@ -213,7 +235,7 @@ ui <- navbarPage("CLIMATE Dashboard",
                                 column(width = 12,
                                        offset = 0,
                                        style = 'padding-bottom:0px; padding-left:0px; padding-right:0px',
-                                       tags$style(type = 'text/css', '#double_map {height: calc(60vh - 60px) !important;}'),
+                                       tags$style(type = 'text/css', '#double_map {height: calc(60vh - 80px) !important;}'),
                               uiOutput("double_map") %>%
                               withSpinner()
                               )),
@@ -224,14 +246,15 @@ ui <- navbarPage("CLIMATE Dashboard",
                                        offset = 0.5,
                                        style =
                                        "padding-top: 1mm;
-                                        padding-left: 0mm;",
+                                        padding-left: 0mm;
+                                       padding-right:0.2;",
                                        tags$head(tags$style("#source_comp1{color:black;  font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
                                        verbatimTextOutput("source_comp1")),
                                 column(6,
                                        offset = 0,
                                        style = 
                                       "padding-top:1mm;   
-                                       padding-left:1px;",
+                                       padding-left:0px;",
                                        tags$head(tags$style("#source_comp2{color:black; font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
                                        verbatimTextOutput("source_comp2")
 
@@ -362,6 +385,9 @@ ui <- navbarPage("CLIMATE Dashboard",
                    
                  ),
                  tabPanel("ABOUT",
+                          tabsetPanel(
+                          tabPanel("ABOUT",
+                          
                           mainPanel(
                             width = 12,
                             
@@ -399,21 +425,52 @@ tags$p(tags$b("This dashboard focuses on disaster risk from floods, heat stress,
        
        tags$p(tags$em(tags$b("For further information and questions or suggestions, please reach out to:"))),
        
-       tags$p("Ghazala Mansuri, Lead Economist, ESAPV  -",  tags$a("gmansuri@worldbank.org")),
-       tags$p("Moritz Meyer, Senior Economist, ESAPV   -",  tags$a("mmeyer3@worldbank.org")),
-       tags$p("Lander Bosch, Regional Geographer/YP    -",  tags$a("lbosch@worldbank.org")),
-       tags$p("Mattia Amadio, Research Analyst         -",  tags$a("mamadio@worldbank.org")),
-       tags$p("Henrik Fisser, Research Analyst         -",  tags$a("ghfisser@worldbank.org")),
-       tags$p("Vincent Mariathanasan, Research Analyst -",  tags$a("vmariathanasan@worldbank.org")),
-       tags$p("Maham Khan, Research Analyst            -",  tags$a("mkhan57@worldbank.org")),
-       tags$p("Zeeshan Haider, Research Analyst        -",  tags$a("shaider7@worldbank.org")),
+       # tags$p(<a href="mailto:afinn1@worldbank.org">afinn1@worldbank.org</a>),
+       tags$p("Ghazala Mansuri, Lead Economist, ESAPV  -",  tags$b(tags$a(href="mailto:gmansuri@worldbank.org", "gmansuri@worldbank.org"))),
+       tags$p("Moritz Meyer, Senior Economist, ESAPV   -",  tags$b(tags$a(href="mailto:mmeyer3@worldbank.org", "mmeyer3@worldbank.org"))),
+       tags$p("Lander Bosch, Regional Geographer/YP    -",  tags$b(tags$a(href="mailto:lbosch@worldbank.org", "lbosch@worldbank.org"))),
+       tags$p("Mattia Amadio, Research Analyst         -",  tags$b(tags$a(href="mailto:mamadio@worldbank.org", "mamadio@worldbank.org"))),
+       tags$p("Henrik Fisser, Research Analyst         -",  tags$b(tags$a(href="mailto:ghfisser@worldbank.org", "ghfisser@worldbank.org"))),
+       tags$p("Vincent Mariathanasan, Research Analyst -",  tags$b(tags$a(href="mailto:vmariathanasan@worldbank.org", "vmariathanasan@worldbank.org"))),
+       tags$p("Maham Khan, Research Analyst            -",  tags$b(tags$a(href="mailto:mkhan57@worldbank.org", "mkhan57@worldbank.org"))),
+       tags$p("Zeeshan Haider, Research Analyst        -",  tags$b(tags$a(href="mailto:shaider7@worldbank.org", "shaider7@worldbank.org"))),
 
                             
                           )
                           )
+),
+                            tabPanel("DOCUMENTATAION",
+                                     mainPanel(
+                                       br(),
+                                       tags$hr(),
+                                       h5("Get datasets used in the climate dashboard"),
+                                       tags$br(),
+                                       fluidRow(
+                                         
+                                         downloadButton("download_nat",
+                                                        "Natural Hazards",
+                                                        class = "btn-success"),
+                                         
+                                         downloadButton("download_dev",
+                                                        "Development Outcomes",
+                                                        class = "btn-success")
+                                       ),
+                                       
+                                       
+                                       hr(),
+                                       tags$hr(),
+                                       h4(strong("Github Repository")),
+                                       br(),
+                                       tags$a(href= "https://github.com/szhaider/CCDR-World-Bank.git", "Repo Link", target="_blank"), br(),
+                                       
+                              
+                            )
 )
 )
-                 
+)
+)
+
+}              
 
 ################################################################################
 
@@ -423,10 +480,22 @@ tags$p(tags$b("This dashboard focuses on disaster risk from floods, heat stress,
 server <- function(input, output, session) {
 ################################################################################
 #Main Landing page  
+  
 # source(file.path("main_landing_page.R"), local = TRUE)  
+  # w <- Waiter$new()
+  
+   # observeEvent(input$main_page, {
+  #   
+        waiter_show()
+        Sys.sleep(3)
+        waiter_hide()
+       
+   # })
+  
 ################################################################################
 #Main Maps
-source(file.path("maps.R"), local = TRUE)
+# source(file.path("maps.R"), local = TRUE)
+  source(file.path("proxy.R"), local = TRUE)
 ################################################################################
   
 ################################################################################
@@ -451,6 +520,12 @@ source(file.path("PTI_Help.R"), local= TRUE)
     show_waiter = FALSE
 
   )
+  
+################################################################################
+#Data Dwonload
+source(file.path("data_download.R"), local = TRUE)  
+################################################################################
+  
 }
 ################################################################################
 

@@ -7,8 +7,9 @@ observeEvent(input$help_comp, {
     title = "How to use these maps",
     p("These maps offer comparison (spatial correlation) between selected CCDR-Pakistan indicators"),
     # p("MAP1 refers to"),
-    p("These maps give district level estimates of CCDR-Pakistan indicators over the selected filters"),
-    p("All indicators are rounded to 2 decimal points"),
+    p("These maps give district and tehsil level estimates of CCDR-Pakistan indicators over the selected filters"),
+    p("Tehsil level maps are available only for Natural Hazards indicators"),
+     p("All indicators are rounded to 2 decimal points"),
     # p("All Natural Hazards Indicators are rounded to 3 decimal points"),
     p("Expect the color mapping to reverse with the context of  the selected indicators - e.g. Poverty (High) = Red whereas; Access to improved toilet facilities (High) = Blue"),
     size = "m", easyClose = TRUE, fade=FALSE,footer = modalButton("Close (Esc)")))
@@ -54,14 +55,15 @@ observeEvent(input$domain_map1,{
 
 observeEvent(input$polygon_map1,{
   if(input$polygon_map1 == "District" & input$domain_map1 == "Natural Hazards"){
-    dis_haz_choices_c1 =  hazards_options[-c(24,25,26)]
+    dis_haz_choices_c1 =  hazards_options[-c(11,24,25,26)]
     updateSelectInput(
       getDefaultReactiveDomain(),
       "indicator_map1",    
-      choices = dis_haz_choices_c1
+      choices = dis_haz_choices_c1,
+      selected = dis_haz_choices_c1[3]
     )
   }else if(input$polygon_map1 == "Tehsil" & input$domain_map1 == "Natural Hazards"){
-    teh_haz_choices_c2 =  hazards_options[-c(1,2,3)]
+    teh_haz_choices_c2 =  hazards_options[-c(1,2,3, 11)]
     updateSelectInput(
       getDefaultReactiveDomain(),
       "indicator_map1",    
@@ -98,13 +100,13 @@ observeEvent(input$domain_map1,{
 
 labels_map1 <- reactive({
   if(input$domain_map1 == "Development Outcomes"){  
-    paste0(glue::glue("<b>District</b>: { pak_shp_comp()$district } </br>"), glue::glue("<b> { map_data1()$indicator_1 }: </b>"), " ", glue::glue("{ round(map_data1()$value, 2)  }"), " ", glue::glue("{ map_data1()$unit }"), sep = "") %>% 
+    paste0(glue::glue("<b>District</b>: { pak_shp_comp()$district } </br>"), glue::glue("<b> { map_data1()$indicator_1 }: </b>"), "\n", glue::glue("{ round(map_data1()$value, 2)  }"), " ", glue::glue("{ map_data1()$unit }"), sep = "") %>% 
       lapply(htmltools::HTML) 
   }else if(input$polygon_map1 == "Tehsil" & input$domain_map1 == "Natural Hazards"){
-    paste0(glue::glue("<b>Tehsil</b>: { pak_shp_comp()$tehsil } </br>"), glue::glue("<b> { map_data1()$indicator_1 }: </b>"), " ", glue::glue("{ round(map_data1()$value, 3) }"), " ", glue::glue("{ map_data1()$unit }"),  sep = "") %>% 
+    paste0(glue::glue("<b>Tehsil</b>: { pak_shp_comp()$tehsil } </br>"), glue::glue("<b> { map_data1()$indicator_1 }: </b>"), "\n", glue::glue("{ round(map_data1()$value, 3) }"), " ", glue::glue("{ map_data1()$unit }"),  sep = "") %>% 
       lapply(htmltools::HTML) 
   }else if(input$polygon_map1 == "District" & input$domain_map1 == "Natural Hazards"){
-    paste0(glue::glue("<b>District</b>: { pak_shp_comp()$district } </br>"), glue::glue("<b> { map_data1()$indicator_1 }: </b>"), " ", glue::glue("{ round(map_data1()$value, 3) }"), " ", glue::glue("{ map_data1()$unit }"), sep = "") %>% 
+    paste0(glue::glue("<b>District</b>: { pak_shp_comp()$district } </br>"), glue::glue("<b> { map_data1()$indicator_1 }: </b>"), "\n", glue::glue("{ round(map_data1()$value, 3) }"), " ", glue::glue("{ map_data1()$unit }"), sep = "") %>% 
       lapply(htmltools::HTML) 
   }
 })
@@ -120,17 +122,36 @@ comp_map1 <- reactive({
     } else {
       c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6')
     }
-    
+
   })
   
+  
   pal1 <- reactive({
-    colorBin(palette = pal_new1(), 
-             bins= 7, na.color = "grey",  
-             domain = map_data1()$value , 
-             pretty = T,
+    colorBin(palette = pal_new1(),
+             bins= 5, na.color = "grey",
+             domain = map_data1()$value ,
+             pretty = F,
              reverse=F)
-    
-  })
+
+   })
+  # pal1 <- reactive({
+  #   if (unique(map_data1()$context) == "negative"){ 
+  #     colorBin(palette = "RdYlBu", 
+  #              bins= 6, na.color = "grey",  
+  #              domain = map_data1()$value , 
+  #              pretty = T,
+  #              reverse=T)
+  #     
+  #     
+  #   }else{
+  #     colorBin(palette = "RdYlBu", 
+  #              bins= 6, na.color = "grey",  
+  #              domain = map_data1()$value , 
+  #              pretty = T,
+  #              reverse=F)
+  #     
+  #   }
+  # })
   
   leaflet(pak_shp_comp(), options = leafletOptions(zoomSnap = 0.20, 
                                                zoomDelta = 0.20)) %>% 
@@ -146,21 +167,22 @@ comp_map1 <- reactive({
     # addProviderTiles(providers$Esri.WorldImagery , group = "ESRI IMG") %>% 
     # addProviderTiles(providers$NASAGIBS.ViirsEarthAtNight2012 , group = "NASA Nightlights") %>% 
     
-    setView(lng=71.5, lat = 29.5, zoom = 4.8) %>% 
+    setView(lng=70, lat = 30, zoom = 5) %>% 
     addPolygons(label= labels_map1(),
                 labelOptions = labelOptions(
                   style = list("font-weight"= "normal",   
                                padding= "3px 8px",
                                "color"= "black"), 
                   textsize= "10px",
-                  direction = "auto"
+                  direction = "auto",
+                  opacity = 0.8
                 ),
                 fillColor =  ~pal1()(map_data1()$value),
                 fillOpacity = 1,
                 stroke = TRUE,
                 color= "white",
                 weight = 1,
-                opacity = 0.7,
+                opacity = 1,
                 fill = TRUE,
                 dashArray = NULL,
                 smoothFactor = 0.5,
@@ -186,6 +208,8 @@ comp_map1 <- reactive({
                   "Legend"
                 },
               opacity= 1,
+              labFormat = labelFormat(
+                digits = 2)
     )
 })
 
@@ -227,14 +251,15 @@ observeEvent(input$domain_map2,{
 
 observeEvent(input$polygon_map2,{
   if(input$polygon_map2 == "District" & input$domain_map2 == "Natural Hazards"){
-    dis_haz_choices_c3 =  hazards_options[-c(24,25,26)]
+    dis_haz_choices_c3 =  hazards_options[-c(11, 24,25,26)]
     updateSelectInput(
       getDefaultReactiveDomain(),
       "indicator_map2",    
-      choices = dis_haz_choices_c3
+      choices = dis_haz_choices_c3,
+      selected = dis_haz_choices_c3[3]
     )
   }else if(input$polygon_map2 == "Tehsil" & input$domain_map2 == "Natural Hazards"){
-    teh_haz_choices_c4 =  hazards_options[-c(1,2,3)]
+    teh_haz_choices_c4 =  hazards_options[-c(1,2,3, 11)]
     updateSelectInput(
       getDefaultReactiveDomain(),
       "indicator_map2",    
@@ -271,13 +296,13 @@ observeEvent(input$domain_map2,{
 
 labels_map2 <- reactive({
   if(input$domain_map2 == "Development Outcomes"){  
-    paste0(glue::glue("<b>District</b>: { pak_shp_comp2()$district } </br>"), glue::glue("<b> { map_data2()$indicator_1 }: </b>"), " ", glue::glue("{ round(map_data2()$value, 2)  }"), " ", glue::glue("{ map_data2()$unit }"), sep = "") %>% 
+    paste0(glue::glue("<b>District</b>: { pak_shp_comp2()$district } </br>"), glue::glue("<b> { map_data2()$indicator_1 }: </b>"), "\n", glue::glue("{ round(map_data2()$value, 2)  }"), " ", glue::glue("{ map_data2()$unit }"), sep = "") %>% 
       lapply(htmltools::HTML) 
-  }else if(input$polygon_map2 == "Tehsil" & input$domain_map1 == "Natural Hazards"){
-    paste0(glue::glue("<b>Tehsil</b>: { pak_shp_comp2()$tehsil } </br>"), glue::glue("<b> { map_data2()$indicator_1 }: </b>"), " ", glue::glue("{ round(map_data2()$value, 3) }"), " ", glue::glue("{ map_data2()$unit }"),  sep = "") %>% 
+  }else if(input$polygon_map2 == "Tehsil" & input$domain_map2 == "Natural Hazards"){
+    paste0(glue::glue("<b>Tehsil</b>: { pak_shp_comp2()$tehsil } </br>"), glue::glue("<b> { map_data2()$indicator_1 }: </b>"), "\n", glue::glue("{ round(map_data2()$value, 3) }"), " ", glue::glue("{ map_data2()$unit }"),  sep = "") %>% 
       lapply(htmltools::HTML) 
-  }else if(input$polygon_map2 == "District" & input$domain_map1 == "Natural Hazards"){
-    paste0(glue::glue("<b>District</b>: { pak_shp_comp2()$district } </br>"), glue::glue("<b> { map_data2()$indicator_1 }: </b>"), " ", glue::glue("{ round(map_data2()$value, 3) }"), " ", glue::glue("{ map_data2()$unit }"), sep = "") %>% 
+  }else if(input$polygon_map2 == "District" & input$domain_map2 == "Natural Hazards"){
+    paste0(glue::glue("<b>District</b>: { pak_shp_comp2()$district } </br>"), glue::glue("<b> { map_data2()$indicator_1 }: </b>"), "\n", glue::glue("{ round(map_data2()$value, 3) }"), " ", glue::glue("{ map_data2()$unit }"), sep = "") %>% 
       lapply(htmltools::HTML) 
   }
 })
@@ -293,18 +318,36 @@ comp_map2 <- reactive({
     } else {
       c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6')
     }
-    
+
   })
-  
+  # 
   pal2 <- reactive({
-    colorBin(palette = pal_new2(), 
-             bins= 7, na.color = "grey",  
-             domain = map_data2()$value , 
-             pretty = T,
+    colorBin(palette = pal_new2(),
+             bins= 5, na.color = "grey",
+             domain = map_data2()$value ,
+             pretty = F,
              reverse=F)
-    
+
   })
-  
+  # 
+  # pal2 <- reactive({
+  #   if (unique(map_data2()$context) == "negative"){ 
+  #     colorBin(palette = "RdYlBu", 
+  #              bins= 6, na.color = "grey",  
+  #              domain = map_data2()$value , 
+  #              pretty = T,
+  #              reverse=T)
+  #     
+  #     
+  #   }else{
+  #     colorBin(palette = "RdYlBu", 
+  #              bins= 6, na.color = "grey",  
+  #              domain = map_data2()$value , 
+  #              pretty = T,
+  #              reverse=F)
+  #     
+  #   }
+  # })
   leaflet(pak_shp_comp2(), options = leafletOptions(zoomSnap = 0.20, 
                                                    zoomDelta = 0.20)) %>% 
     addProviderTiles(providers$CartoDB, group = "CARTO") %>% 
@@ -319,21 +362,22 @@ comp_map2 <- reactive({
     # addProviderTiles(providers$Esri.WorldImagery , group = "ESRI IMG") %>% 
     # addProviderTiles(providers$NASAGIBS.ViirsEarthAtNight2012 , group = "NASA Nightlights") %>% 
     
-    setView(lng=71.5, lat = 29.5, zoom = 4.8) %>% 
+    setView(lng=70, lat = 30, zoom = 5) %>% 
     addPolygons(label= labels_map2(),
                 labelOptions = labelOptions(
                   style = list("font-weight"= "normal",   
                                padding= "3px 8px",
                                "color"= "black"), 
                   textsize= "10px",
-                  direction = "auto"
+                  direction = "auto",
+                  opacity = 0.8
                 ),
                 fillColor =  ~pal2()(map_data2()$value),
                 fillOpacity = 1,
                 stroke = TRUE,
                 color= "white",
                 weight = 1,
-                opacity = 0.7,
+                opacity = 1,
                 fill = TRUE,
                 dashArray = NULL,
                 smoothFactor = 0.5,
@@ -359,6 +403,8 @@ comp_map2 <- reactive({
                   "Legend"
                 },
               opacity= 1,
+              labFormat = labelFormat(
+                digits = 2)
     )
 })
 

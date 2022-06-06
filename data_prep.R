@@ -281,6 +281,12 @@ legend_data <- readxl::read_excel("legend_data.xlsx", na= " ") %>%
 
 data %>%
   left_join(legend_data, by="indicator") %>% 
+  mutate(value = 
+           case_when(
+             indicator_1 == "Population (WorldPop 2020)" ~ round(value, 0),
+             indicator_1 == "District population" ~ round(value, 0),
+             TRUE ~ value
+           )) %>% 
   write_rds("CCDR_Dashboard/data/data.RDS")
 
 
@@ -312,6 +318,9 @@ pak_shp %>% write_rds("CCDR_Dashboard/data/pak_shp.RDS")
 ################################################################################
 ###Metadata for PTI
 metadata_climate <- import_list("data/pak_metadata_climate.xlsx")
+
+# devPTIpack::validate_metadata(metadata_climate)
+
 metadata_climate %>% 
   write_rds("CCDR_Dashboard/data/pak_metadata_climate.RDS")
 ################################################################################

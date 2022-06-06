@@ -34,14 +34,14 @@ observeEvent(input$domain_bar,{
 observeEvent(input$polygon_bar,{
   observeEvent(input$domain_bar,{
 if(input$domain_bar == "Natural Hazards" & input$polygon_bar == "District"){
-    bar_choices_haz1 =  hazards_options[-c(24,25,26)]
+    bar_choices_haz1 =  hazards_options[-c(11, 24,25,26)]
     updateSelectInput(
       getDefaultReactiveDomain(),
       "indicator_bar",
       choices =bar_choices_haz1
     )
 }else if(input$domain_bar == "Natural Hazards" & input$polygon_bar == "Tehsil"){
-  bar_choices_haz2 = hazards_options[-c(1,2,3)]
+  bar_choices_haz2 = hazards_options[-c(1,2,3, 11)]
   updateSelectInput(
     getDefaultReactiveDomain(),
     "indicator_bar",
