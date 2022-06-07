@@ -1,0 +1,184 @@
+#Comparison Map 2
+
+#Map2
+
+#shape file used
+pak_shp_comp2 <-  reactive({
+  pak_shp[[input$polygon_map2]]
+})
+
+map_data2 <- reactive({
+  # req(input$domain_map2 == "Natural Hazards" || input$domain_map2 =="Development Outcomes")
+  data %>%
+    filter(polygon   %in%  input$polygon_map2,
+           domain    %in%  input$domain_map2,
+           indicator_1 %in%  input$indicator_map2)
+})
+
+#Updating Indicators based on Domain
+observeEvent(input$domain_map2,{
+  if( input$domain_map2 == "Development Outcomes"){
+    choices_dev_c2 =  data %>%
+      filter(domain == "Development Outcomes") %>%
+      distinct(indicator_1) %>%
+      pull(indicator_1)
+    
+    updateSelectInput(
+      getDefaultReactiveDomain(),
+      "indicator_map2",
+      choices = choices_dev_c2
+    )
+  }else {
+    updateSelectInput(
+      getDefaultReactiveDomain(),
+      "indicator_map2",
+      choices = hazards_options)
+  }
+})
+
+observeEvent(input$polygon_map2,{
+  if(input$polygon_map2 == "District" & input$domain_map2 == "Natural Hazards"){
+    dis_haz_choices_c3 =  hazards_options[-c(11, 24,25,26)]
+    updateSelectInput(
+      getDefaultReactiveDomain(),
+      "indicator_map2",
+      choices = dis_haz_choices_c3,
+      selected = dis_haz_choices_c3[3]
+    )
+  }else if(input$polygon_map2 == "Tehsil" & input$domain_map2 == "Natural Hazards"){
+    teh_haz_choices_c4 =  hazards_options[-c(1,2,3, 11)]
+    updateSelectInput(
+      getDefaultReactiveDomain(),
+      "indicator_map2",
+      choices = teh_haz_choices_c4)
+  }
+})
+
+#Updating spatial level based on selected domain: so that when domain goes to development,
+# District is selected by default
+observeEvent(input$domain_map2,{
+  if(input$domain_map2 == "Development Outcomes"){
+    choices_pol_c3 = unique(data$polygon)[1]
+    
+    updateSelectizeInput(
+      getDefaultReactiveDomain(),
+      "polygon_map2",
+      choices = choices_pol_c3)
+    
+  }else{
+    choices_pol_c4 = unique(data$polygon)
+    
+    updateSelectizeInput(
+      getDefaultReactiveDomain(),
+      "polygon_map2",
+      choices = choices_pol_c4)
+  }
+})
+
+#Leaflet map2
+output$double_map_2 <- renderLeaflet({
+  leaflet(options = leafletOptions(zoomSnap = 0.20, 
+                                   zoomDelta = 0.20)) %>% 
+    addProviderTiles(providers$CartoDB, group = "CARTO") %>% 
+    # addProviderTiles(providers$Esri , group = "ESRI") %>%
+    setView(lng=70, lat = 30, zoom = 5) %>% 
+    syncWith("combined_map")
+  
+})
+
+
+outputOptions(output, "double_map_2", suspendWhenHidden = FALSE)
+
+# observeEvent(input$my_tab == "my_tab1",{
+#Labelling for  Map2
+
+  
+  # req(input$domain_map2 == "Natural Hazards" || input$domain_map2 =="Development Outcomes")
+  labels_map2 <- reactive({
+    if(input$domain_map2 == "Development Outcomes"){
+      paste0(glue::glue("<b>District</b>: { pak_shp_comp2()$district } </br>"), glue::glue("<b> { map_data2()$indicator_1 }: </b>"), "\n", glue::glue("{ round(map_data2()$value, 2)  }"), " ", glue::glue("{ map_data2()$unit }"), sep = "") %>%
+        lapply(htmltools::HTML)
+    }else if(input$polygon_map2 == "Tehsil" & input$domain_map2 == "Natural Hazards"){
+      paste0(glue::glue("<b>Tehsil</b>: { pak_shp_comp2()$tehsil } </br>"), glue::glue("<b> { map_data2()$indicator_1 }: </b>"), "\n", glue::glue("{ round(map_data2()$value, 3) }"), " ", glue::glue("{ map_data2()$unit }"),  sep = "") %>%
+        lapply(htmltools::HTML)
+    }else if(input$polygon_map2 == "District" & input$domain_map2 == "Natural Hazards"){
+      paste0(glue::glue("<b>District</b>: { pak_shp_comp2()$district } </br>"), glue::glue("<b> { map_data2()$indicator_1 }: </b>"), "\n", glue::glue("{ round(map_data2()$value, 3) }"), " ", glue::glue("{ map_data2()$unit }"), sep = "") %>%
+        lapply(htmltools::HTML)
+    }
+  })
+  
+  pal_new2 <- reactive({
+    req(unique(map_data2()$context) %in% c("negative", "positive"))
+    if (unique(map_data2()$context) == "negative"){
+      c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c')
+    } else {
+      c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6')
+    }
+    
+  })
+  #
+  pal2 <- reactive({
+    colorBin(palette = pal_new2(),
+             bins= 5, na.color = "grey",
+             domain = NULL,
+             pretty = F,
+             reverse=F)
+    
+  })
+  
+  pal_leg2 <- reactive({
+    colorBin(palette = pal_new2(),
+             bins= 5, na.color = "grey",
+             domain = map_data2()$value ,
+             pretty = F,
+             reverse=F)
+    
+  })
+  
+  
+  observe({ 
+  # req(input$my_tab == "my_tab1")  
+    
+  leafletProxy("double_map_2", data= pak_shp_comp2()) %>%
+    clearShapes() %>% 
+    addPolygons(label= labels_map2(),
+                labelOptions = labelOptions(
+                  style = list("font-weight"= "normal",
+                               padding= "3px 8px",
+                               "color"= "black"),
+                  textsize= "10px",
+                  direction = "auto",
+                  opacity = 0.8
+                ),
+                fillColor =  ~pal2()(map_data2()$value),
+                fillOpacity = 1,
+                stroke = TRUE,
+                color= "white",
+                weight = 1,
+                opacity = 1,
+                fill = TRUE,
+                dashArray = NULL,
+                smoothFactor = 0.5,
+                highlightOptions = highlightOptions(weight= 5,
+                                                    fillOpacity = 1,
+                                                    opacity= 1,
+                                                    bringToFront = TRUE),
+                group = "Polygons") %>%
+                addScaleBar("bottomleft") 
+  
+  leafletProxy("double_map_2", data = map_data2()) %>% 
+    clearControls() %>% 
+    addLegend("bottomright",
+              pal= pal_leg2(),
+              values= map_data2()$value,
+              title =
+                if(unique(map_data2()$unit) != ""){
+                  glue("Legend", " ", "{ unique(map_data2()$unit)  }")
+                }else{
+                  "Legend"
+                },
+              opacity= 1,
+              labFormat = labelFormat(
+                digits = 2)
+    )
+})

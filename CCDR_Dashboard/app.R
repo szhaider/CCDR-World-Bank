@@ -24,10 +24,13 @@ library(highcharter)
 library(devPTIpack)
 library(maptools)
 library(gpclib)
-gpclibPermit()
 library(waiter)
+library(leaflet.minicharts)
+# library(manipulateWidget)
 # library(broom)
-
+# library(webshot)
+# install_phantomjs()
+suppressWarnings(gpclibPermit())
 
 
 
@@ -77,16 +80,21 @@ spatial_level <- unique(data$polygon)
 ################################################################################
 ui <- function(request){
          
-                 tagList(
-                   waiter_show_on_load(html = spin_loaders(10)),
-                   # br(),
-                 )
+                 # tagList(
+                 #   waiter_show_on_load(html = spin_loaders(10)),
+                 #   # br(),
+                 # )
   
   navbarPage("CLIMATE Dashboard",
-                 tags$style(type="text/css",
-                            ".shiny-output-error { visibility: hidden; }",
-                            ".shiny-output-error:before { visibility: hidden; }"
-                 ),
+             
+             ####################
+             #to suppress error on screen
+                 # tags$style(type="text/css",
+                 #            ".shiny-output-error { visibility: hidden; }",
+                 #            ".shiny-output-error:before { visibility: hidden; }"
+                 # ),
+             ####################
+             
                   # header= tagList(
                  #   useShinydashboard()
                  # ),
@@ -97,12 +105,12 @@ ui <- function(request){
                                       
                                       tabPanel("main_page1", 
                                                id="main_page1", 
-                          # bootstrapPage(theme = shinytheme("flatly")),
-                          # tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
-                          
+                           # bootstrapPage(theme = shinytheme("flatly")),
+
                           # use_waiter(),
                           # waiter_show_on_load(html = spin_loaders(10)),
                           
+                          # tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
                           
                           tags$style(type = 'text/css', '#maps {height: calc(98vh - 100px) !important;}', style= 'padding-top:0px;'),
                           leafletOutput("maps"),
@@ -177,8 +185,17 @@ ui <- function(request){
                  
                  )
                  ),
-                 tabPanel("COMPARISON MAPS",
-                          sidebarLayout(
+                   tabPanel("COMPARISON MAPS",
+             # h3("COMPARISON MAPS"),
+            # mainPanel(width = 9,
+                          tabsetPanel(
+                            # "COMPARISON MAPS",
+                                      id="my_tab",
+                                       type = c("hidden"),
+                                      tabPanel("my_tab1",
+
+                                  
+                            sidebarLayout(
                             sidebarPanel(
                               width = 3,
                               style = "background-color: white;
@@ -207,6 +224,7 @@ ui <- function(request){
                                           "Choose Indicator for MAP1",
                                           choices = hazards_options,
                                           selectize = F),
+                              hr(),
                               selectInput("domain_map2",
                                           "Choose Domain for MAP2",
                                           choices = domain_options,
@@ -225,19 +243,28 @@ ui <- function(request){
                                           choices = hazards_options,
                                           selectize = F),
                              
-                               actionButton("screenshot_comp", "Image",class="btn-sm", icon = icon("camera")),
+                               # actionButton("screenshot_comp", "Image",class="btn-sm", icon = icon("camera")),
                                actionButton("help_comp", "Help", icon= icon('question-circle'), class ="btn-sm"),
                             ),
                           
                             mainPanel(
                               width = 9,
                               fluidRow(
-                                column(width = 12,
-                                       offset = 0,
-                                       style = 'padding-bottom:0px; padding-left:0px; padding-right:0px',
-                                       tags$style(type = 'text/css', '#double_map {height: calc(60vh - 80px) !important;}'),
-                              uiOutput("double_map") %>%
-                              withSpinner()
+                                column(width = 6,
+                                       offset = 0.5,
+                                       style = 'padding-bottom:0px; padding-left:0px; padding-right:5px',
+                                       tags$style(type = 'text/css', '#double_map_1 {height: calc(90vh - 60px) !important;}'),
+                              leafletOutput("double_map_1", width = "100%", height = "400px")
+                              # %>%
+                              # withSpinner()
+                              ),
+                              column(width = 6,
+                                     offset = 0.5,
+                                     style = 'padding-bottom:1px; padding-left:0px; padding-right:1px',
+                                     tags$style(type = 'text/css', '#double_map_2 {height: calc(90vh - 60px) !important;}'),
+                                     leafletOutput("double_map_2", width = "100%", height = "400px")
+                                     # %>%
+                                     #   withSpinner() 
                               )),
                               # br(),
                               # br(),
@@ -245,29 +272,29 @@ ui <- function(request){
                                 column(6,
                                        offset = 0.5,
                                        style =
-                                       "padding-top: 1mm;
-                                        padding-left: 0mm;
-                                       padding-right:0.2;",
+                                       "padding-top: 1px;
+                                        padding-left: 0px;
+                                       padding-right:5px;",
                                        tags$head(tags$style("#source_comp1{color:black;  font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
                                        verbatimTextOutput("source_comp1")),
                                 column(6,
                                        offset = 0,
                                        style = 
-                                      "padding-top:1mm;   
-                                       padding-left:0px;",
+                                      "padding-top:1px;   
+                                       padding-left:0.1px;
+                                      padding-right:2px",
                                        tags$head(tags$style("#source_comp2{color:black; font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
                                        verbatimTextOutput("source_comp2")
 
                                 ))
                             )
                             )
-                            
-                            
-                          
-                          
-                   
-                 ),
-                 tabPanel("GRAPHS",
+                          ),
+                           selected = "my_tab1")
+                       # )
+            ),
+                  
+             tabPanel("GRAPHS",
                          
                           sidebarLayout(
                             sidebarPanel(width= 3,
@@ -486,21 +513,23 @@ server <- function(input, output, session) {
   
    # observeEvent(input$main_page, {
   #   
-        waiter_show()
-        Sys.sleep(3)
-        waiter_hide()
+         waiter_show()
+         Sys.sleep(3)
+         waiter_hide()
        
    # })
   
 ################################################################################
 #Main Maps
-# source(file.path("maps.R"), local = TRUE)
-  source(file.path("proxy.R"), local = TRUE)
+source(file.path("maps.R"), local = TRUE)
 ################################################################################
   
 ################################################################################
 #Comparison Maps
-source(file.path("comparison_maps.R"), local = TRUE)  
+        # source(file.path("proxy.R"), local = TRUE)
+        
+source(file.path("comparison_maps1.R"), local = TRUE)  
+source(file.path("comparison_maps2.R"), local = TRUE)  
 ################################################################################
 #Bar Charts
 source(file.path('bar_charts.R'), local = TRUE)  
