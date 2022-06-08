@@ -32,10 +32,12 @@ observeEvent(input$domain_map2,{
     updateSelectInput(
       getDefaultReactiveDomain(),
       "indicator_map2",
-      choices = hazards_options)
+      choices = hazards_options[-11]
+      )
   }
 })
 
+observeEvent(input$domain_map2,{
 observeEvent(input$polygon_map2,{
   if(input$polygon_map2 == "District" & input$domain_map2 == "Natural Hazards"){
     dis_haz_choices_c3 =  hazards_options[-c(11, 24,25,26)]
@@ -52,6 +54,7 @@ observeEvent(input$polygon_map2,{
       "indicator_map2",
       choices = teh_haz_choices_c4)
   }
+})
 })
 
 #Updating spatial level based on selected domain: so that when domain goes to development,

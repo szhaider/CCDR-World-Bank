@@ -234,11 +234,17 @@ development_indicators <- readxl::read_excel("data/pak_sub_ADM2_handover.xlsx", 
          district != "Karachi South",
          district != "Karachi West") %>% 
   mutate(`Population (WorldPop 2020)` = `Population (WorldPop 2020)`/100000,
+         `Population Density (WorldPop 2020)` = `Population Density (WorldPop 2020)`/100,
+         `Health Facility Density Per 100,000 inhabitants(Alhasan 2017)`= `Health Facility Density Per 100,000 inhabitants(Alhasan 2017)` /100,
+         `High Health Facility Density (Alhasan 2017)`=`High Health Facility Density (Alhasan 2017)`/100,
+         `Low Health Facility Density (Alhasan 2017)`= `Low Health Facility Density (Alhasan 2017)`/100,
+         `Road Density`= `Road Density`/100,
+         `Road density normalised`= `Road density normalised`/100,
          `Access to improved toilet facilities (PSLM 2014)`= `Access to improved toilet facilities (PSLM 2014)`/100,
          `Access to improved toilet facilities (PSLM 2019)` = `Access to improved toilet facilities (PSLM 2019)`/100,
          `Access to improved toilet facilities (PSLM 2014/2019)`= `Access to improved toilet facilities (PSLM 2014/2019)`/100,
          ) %>% 
-  mutate_if(is.numeric, multiply100) %>% 
+  mutate_if(is.numeric, multiply100) %>%
   pivot_longer(`Population (WorldPop 2020)`:`Lack of access to improved toilet facilities (PSLM 2014/2019)`,
                names_to = "indicator", 
                values_to = "value") %>% 

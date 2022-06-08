@@ -64,6 +64,7 @@ observeEvent(input$table_domain, {
 })
 
 #Updating again to make tesil indicators from district go away, and vice versa
+observeEvent(input$table_domain,{   #<<<<<<<<<<<
 observeEvent(input$table_polygon,{
   if(input$table_polygon == "District" & input$table_domain == "Natural Hazards"){
   choices_haz_tab1 = data %>% 
@@ -99,7 +100,7 @@ observeEvent(input$table_polygon,{
     )
   }
 })
-
+})
 
 #Table Data
 tables_climate <- reactive({

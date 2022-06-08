@@ -47,10 +47,12 @@ observeEvent(input$domain_map,{
     updateSelectInput(
       getDefaultReactiveDomain(),
       "indicator_map",    
-      choices = hazards_options)
+      choices = hazards_options[-11]
+      )
   }
 })
 
+observeEvent(input$domain_map,{   #Latest to stop tehsil option to show up in districts when come back from development to hazards
 observeEvent(input$polygon_map,{
   if(input$polygon_map == "District" & input$domain_map == "Natural Hazards"){
     dis_haz_choices =  hazards_options[-c(11, 24,25,26)]
@@ -67,6 +69,7 @@ observeEvent(input$polygon_map,{
       "indicator_map",    
       choices = teh_haz_choices)
   }
+})
 })
 
 #Updating spatial level based on selected domain: so that when domain goes to development, 
@@ -96,6 +99,7 @@ output$maps <- renderLeaflet({
   leaflet(options = leafletOptions(zoomSnap = 0.20, zoomDelta = 0.20)) %>%
     addProviderTiles(providers$Esri, group = "ESRI") %>%
     addProviderTiles(providers$CartoDB, group = "CARTO") %>%
+    # addProviderTiles(providers$st , group = "Stadia") %>% 
     setView(lng=69.5, lat = 30, zoom = 5.2)
 })
 
@@ -185,7 +189,7 @@ labels_map <- reactive({
                                                     bringToFront = TRUE), 
                 group = "Polygons") %>%
     
-    addLayersControl(baseGroups = c("CARTO", "ESRI"),
+    addLayersControl(baseGroups = c("CARTO", "ESRI", "Stadia"),
                      # overlayGroups = c("Polygons"),
                      options = layersControlOptions(collapsed = TRUE)) %>% 
     

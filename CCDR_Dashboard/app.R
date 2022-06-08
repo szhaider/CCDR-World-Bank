@@ -57,6 +57,7 @@ development_options <- data %>%
 #Natural Hazard Option List
 hazards_options <- data %>% 
   filter(domain == "Natural Hazards") %>% 
+  # arrange(indicator_1) %>% 
   distinct(indicator_1) %>% 
   pull(indicator_1)
 
@@ -69,9 +70,14 @@ domain_options <- data %>%
 spatial_level <- unique(data$polygon)
 
 #Listed Indicator Options
-# indicator_listed = (list(`Natural Hazards` = list("Original Budget", "Original Budget Per Capita", "Original Budget Per Poor Person"),
-#                           `Final Budget` = list("Final Budget", "Final Budget Per Capita","Final Budget Per Poor Person", "Ratio - Final to Original Budget"),
-#                           `Actual Expenses` = list("Actual Expenses", "Actual Expenses Per Capita","Actual Expenses Per Poor Person",  "Ratio - Actual Expenses to Original Budget", "Ratio - Actual Expenses to Final Budget")))
+ # indicator_listed = (list(`River flooding` = list("Expected mortality from river floods (population count)", "Expected mortality from river floods (% of ADM population)", "Expected damage to built-up assets from river floods (hectares)", "Expected damage to built-up assets from river floods (% of ADM built-up area)", "Expected exposure of agricultural land to river floods (hectares)", "Expected exposure of agricultural land to river floods (% of ADM agricultural land)"),
+ #                           `Coastal flooding` = list("Expected mortality from coastal floods (population count)","Expected mortality from coastal floods (% of ADM population)", "Expected damage to built-up assets from river floods (hectares)", "Expected damage to built-up assets from coastal floods (% of ADM built-up area)"),
+ #                           `Landslides` = list("Landslides", "Landslides","Built-up assets exposed to medium or high landslide hazard (Hectares)",  "Built-up assets exposed to medium or high landslide hazard (% of ADM built-up area)"),
+ #                          `Drought` = list("Frequency of agricultural drought stress affecting at least 30% of arable land during Season 1/Kharif (percentage of historical period 1984-2022)","Frequency of agricultural drought stress affecting at least 30% of arable land during Season 2/Rabi (percentage of historical period 1984-2022)" ),
+ #                          `Heat stress` = list("Expected exposure to heat stress (population count)", "Expected exposure to heat stress (% of ADM population)"),
+ #                           `Air pollution`= list("Expected increase of mortality from air pollu`tion (population count)", "Expected increase of mortality from air pollution (% of ADM population)"),
+ #                          `Demography` = list("District Population", "Tehsil Population"),
+ #                          `Agriculture & Built-up Area ` = list("Built-up area extent (Ha)", "Agricultural land extent (Ha)", "Tehsil Built-up area extent (Ha)", "Tehsil Agricultural land extent (Ha)")))
 
 
 ################################################################################
@@ -84,7 +90,7 @@ ui <- function(request){
                  #   waiter_show_on_load(html = spin_loaders(10)),
                  #   # br(),
                  # )
-  
+  # tags$style(".recalculating { opacity: inherit !important; }")
   navbarPage("CLIMATE Dashboard",
              
              ####################
@@ -108,7 +114,7 @@ ui <- function(request){
                            # bootstrapPage(theme = shinytheme("flatly")),
 
                           # use_waiter(),
-                          # waiter_show_on_load(html = spin_loaders(10)),
+                          waiter_show_on_load(html = spin_loaders(10)),
                           
                           # tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
                           
@@ -137,7 +143,12 @@ ui <- function(request){
                                                     "Choose Domain",
                                                     choices = domain_options,
                                                     selected = domain_options[1],
-                                                    selectize = F),   
+                                                    selectize = F),
+                                      
+                                      selectInput("indicator_map",
+                                                  "Choose Indicator",
+                                                  choices = hazards_options,
+                                                  selectize = F),  
                                       conditionalPanel(
                                       condition = "input.domain_map == 'Natural Hazards'",
                                       selectInput("polygon_map",
@@ -146,10 +157,6 @@ ui <- function(request){
                                                     selected = spatial_level[1],
                                                     selectize = F)
                                       ),
-                                      selectInput("indicator_map",
-                                               "Choose Indicator",
-                                               choices = hazards_options,
-                                               selectize = F),
                                         # radioButtons("pallettes_fed", ("Change Color Scheme"), inline = TRUE, choices = list("Values"  = "pallette_fed1",
                                         # h6(tags$b(tags$em("Use this button to download the data underlying the current on-screen map"))),
                                         downloadButton("mapdata", "Data", class= "btn-sm"),
@@ -212,6 +219,10 @@ ui <- function(request){
                                           choices = domain_options,
                                           selected = domain_options[1],
                                           selectize = F),   
+                              selectInput("indicator_map1",
+                                          "Choose Indicator for MAP1",
+                                          choices = hazards_options,
+                                          selectize = F),
                               conditionalPanel(
                                 condition = "input.domain_map1 == 'Natural Hazards'",
                                 selectInput("polygon_map1",
@@ -220,16 +231,18 @@ ui <- function(request){
                                             selected = spatial_level[1],
                                             selectize = F)
                               ),
-                              selectInput("indicator_map1",
-                                          "Choose Indicator for MAP1",
-                                          choices = hazards_options,
-                                          selectize = F),
+                              
                               hr(),
                               selectInput("domain_map2",
                                           "Choose Domain for MAP2",
                                           choices = domain_options,
                                           selected = domain_options[1],
-                                          selectize = F),   
+                                          selectize = F),  
+                              
+                              selectInput("indicator_map2",
+                                          "Choose Indicator for MAP2",
+                                          choices = hazards_options,
+                                          selectize = F),
                               conditionalPanel(
                                 condition = "input.domain_map2 == 'Natural Hazards'",
                                 selectInput("polygon_map2",
@@ -238,10 +251,6 @@ ui <- function(request){
                                             selected = spatial_level[1],
                                             selectize = F)
                               ),
-                              selectInput("indicator_map2",
-                                          "Choose Indicator for MAP2",
-                                          choices = hazards_options,
-                                          selectize = F),
                              
                                # actionButton("screenshot_comp", "Image",class="btn-sm", icon = icon("camera")),
                                actionButton("help_comp", "Help", icon= icon('question-circle'), class ="btn-sm"),
@@ -320,6 +329,12 @@ ui <- function(request){
                             "Choose Domain",
                             choices = unique(data$domain)
                           ),
+                          selectInput(
+                            "indicator_bar",
+                            "Choose Indicator",
+                            choices = unique(data$indicator_1),
+                            selectize = F
+                          ),
                          
                           conditionalPanel(
                           condition = "input.domain_bar == 'Natural Hazards'",  
@@ -330,12 +345,7 @@ ui <- function(request){
                                       selectize = F)
                           ),
                           
-                          selectInput(
-                            "indicator_bar",
-                            "Choose Indicator",
-                            choices = unique(data$indicator_1),
-                            selectize = F
-                          ),
+                         
                           actionButton("help_bar", "Help", icon= icon('question-circle'), class ="btn-sm"),
                          
                             ),
@@ -381,6 +391,10 @@ ui <- function(request){
                                           "Choose Domain",
                                           choices = unique(data$domain),
                                           selectize = F),
+                              selectInput("table_indicator",
+                                          "Choose Indicator",
+                                          choices = unique(data$indicator_1),
+                                          selectize = F),
                               conditionalPanel(
                               condition = "input.table_domain == 'Natural Hazards'",
                               selectInput("table_polygon",
@@ -388,10 +402,7 @@ ui <- function(request){
                                           choices = unique(data$polygon),
                                           selectize = F)
                               ),
-                              selectInput("table_indicator",
-                                          "Choose Indicator",
-                                          choices = unique(data$indicator_1),
-                                          selectize = F),
+                              
                               
                               verbatimTextOutput("source_table"),
                               tags$head(tags$style("#source_table{color:black; font-size:12px; font-style:italic; 
