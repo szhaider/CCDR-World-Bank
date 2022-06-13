@@ -67,22 +67,38 @@ observeEvent(input$table_domain, {
 observeEvent(input$table_domain,{   #<<<<<<<<<<<
 observeEvent(input$table_polygon,{
   if(input$table_polygon == "District" & input$table_domain == "Natural Hazards"){
-  choices_haz_tab1 = data %>% 
-    filter(domain == "Natural Hazards") %>% 
-    distinct(indicator_1) %>% 
-    slice_head(n=-3) %>% 
-    pull(indicator_1)
+  choices_haz_tab1 = (list(`River flooding` = list("Expected mortality from river floods (population count)", "Expected mortality from river floods (% of ADM population)", "Expected damage to built-up assets from river floods (hectares)", "Expected damage to built-up assets from river floods (% of ADM built-up area)", "Expected exposure of agricultural land to river floods (hectares)", "Expected exposure of agricultural land to river floods (% of ADM agricultural land)"),
+                           `Coastal flooding` = list("Expected mortality from coastal floods (population count)", "Expected damage to built-up assets from coastal floods (hectares)", "Expected damage to built-up assets from coastal floods (% of ADM built-up area)"),   #"Expected mortality from coastal floods (% of ADM population)",
+                           `Landslides` = list("Population exposed to medium or high landslide hazard (population count)", "Population exposed to medium or high landslide hazard (% of ADM population)","Built-up assets exposed to medium or high landslide hazard (Hectares)",  "Built-up assets exposed to medium or high landslide hazard (% of ADM built-up area)"),
+                           `Drought` = list("Frequency of agricultural drought stress affecting at least 30% of arable land during Season 1/Kharif (percentage of historical period 1984-2022)","Frequency of agricultural drought stress affecting at least 30% of arable land during Season 2/Rabi (percentage of historical period 1984-2022)" ),
+                           `Heat stress` = list("Expected exposure to heat stress (population count)", "Expected exposure to heat stress (% of ADM population)"),
+                           `Air pollution`= list("Expected increase of mortality from air pollution (population count)", "Expected increase of mortality from air pollution (% of ADM population)"),
+                           `Demography` = list("District Population"),
+                           `Agriculture & Built-up Area` = list("Built-up area extent (Ha)", "Agricultural land extent (Ha)")))  
+    # data %>% 
+    # filter(domain == "Natural Hazards") %>% 
+    # distinct(indicator_1) %>% 
+    # slice_head(n=-3) %>% 
+    # pull(indicator_1)
     updateSelectInput(
       getDefaultReactiveDomain(),
       "table_indicator",
       choices = choices_haz_tab1
     )
   }else if(input$table_polygon == "Tehsil" & input$table_domain == "Natural Hazards") {
-    choices_haz_tab2 = data %>% 
-      filter(domain == "Natural Hazards") %>% 
-      distinct(indicator_1) %>% 
-      slice_tail(n=-3) %>% 
-      pull(indicator_1)
+    choices_haz_tab2 = (list(`River flooding` = list("Expected mortality from river floods (population count)", "Expected mortality from river floods (% of ADM population)", "Expected damage to built-up assets from river floods (hectares)", "Expected damage to built-up assets from river floods (% of ADM built-up area)", "Expected exposure of agricultural land to river floods (hectares)", "Expected exposure of agricultural land to river floods (% of ADM agricultural land)"),
+                             `Coastal flooding` = list("Expected mortality from coastal floods (population count)", "Expected damage to built-up assets from coastal floods (hectares)", "Expected damage to built-up assets from coastal floods (% of ADM built-up area)"),   #"Expected mortality from coastal floods (% of ADM population)",
+                             `Landslides` = list("Population exposed to medium or high landslide hazard (population count)", "Population exposed to medium or high landslide hazard (% of ADM population)","Built-up assets exposed to medium or high landslide hazard (Hectares)",  "Built-up assets exposed to medium or high landslide hazard (% of ADM built-up area)"),
+                             `Drought` = list("Frequency of agricultural drought stress affecting at least 30% of arable land during Season 1/Kharif (percentage of historical period 1984-2022)","Frequency of agricultural drought stress affecting at least 30% of arable land during Season 2/Rabi (percentage of historical period 1984-2022)" ),
+                             `Heat stress` = list("Expected exposure to heat stress (population count)", "Expected exposure to heat stress (% of ADM population)"),
+                             `Air pollution`= list("Expected increase of mortality from air pollution (population count)", "Expected increase of mortality from air pollution (% of ADM population)"),
+                             `Demography` = list("Tehsil Population"),
+                             `Agriculture & Built-up Area` = list("Tehsil Built-up area extent (Ha)", "Tehsil Agricultural land extent (Ha)"))) 
+      # data %>% 
+      # filter(domain == "Natural Hazards") %>% 
+      # distinct(indicator_1) %>% 
+      # slice_tail(n=-3) %>% 
+      # pull(indicator_1)
     updateSelectInput(
       getDefaultReactiveDomain(),
       "table_indicator",

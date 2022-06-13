@@ -70,14 +70,14 @@ domain_options <- data %>%
 spatial_level <- unique(data$polygon)
 
 #Listed Indicator Options
- # indicator_listed = (list(`River flooding` = list("Expected mortality from river floods (population count)", "Expected mortality from river floods (% of ADM population)", "Expected damage to built-up assets from river floods (hectares)", "Expected damage to built-up assets from river floods (% of ADM built-up area)", "Expected exposure of agricultural land to river floods (hectares)", "Expected exposure of agricultural land to river floods (% of ADM agricultural land)"),
- #                           `Coastal flooding` = list("Expected mortality from coastal floods (population count)","Expected mortality from coastal floods (% of ADM population)", "Expected damage to built-up assets from river floods (hectares)", "Expected damage to built-up assets from coastal floods (% of ADM built-up area)"),
- #                           `Landslides` = list("Landslides", "Landslides","Built-up assets exposed to medium or high landslide hazard (Hectares)",  "Built-up assets exposed to medium or high landslide hazard (% of ADM built-up area)"),
- #                          `Drought` = list("Frequency of agricultural drought stress affecting at least 30% of arable land during Season 1/Kharif (percentage of historical period 1984-2022)","Frequency of agricultural drought stress affecting at least 30% of arable land during Season 2/Rabi (percentage of historical period 1984-2022)" ),
- #                          `Heat stress` = list("Expected exposure to heat stress (population count)", "Expected exposure to heat stress (% of ADM population)"),
- #                           `Air pollution`= list("Expected increase of mortality from air pollu`tion (population count)", "Expected increase of mortality from air pollution (% of ADM population)"),
- #                          `Demography` = list("District Population", "Tehsil Population"),
- #                          `Agriculture & Built-up Area ` = list("Built-up area extent (Ha)", "Agricultural land extent (Ha)", "Tehsil Built-up area extent (Ha)", "Tehsil Agricultural land extent (Ha)")))
+ indicator_listed = (list(`River flooding` = list("Expected mortality from river floods (population count)", "Expected mortality from river floods (% of ADM population)", "Expected damage to built-up assets from river floods (hectares)", "Expected damage to built-up assets from river floods (% of ADM built-up area)", "Expected exposure of agricultural land to river floods (hectares)", "Expected exposure of agricultural land to river floods (% of ADM agricultural land)"),
+                          `Coastal flooding` = list("Expected mortality from coastal floods (population count)", "Expected damage to built-up assets from coastal floods (hectares)", "Expected damage to built-up assets from coastal floods (% of ADM built-up area)"),   #"Expected mortality from coastal floods (% of ADM population)",
+                          `Landslides` = list("Population exposed to medium or high landslide hazard (population count)", "Population exposed to medium or high landslide hazard (% of ADM population)","Built-up assets exposed to medium or high landslide hazard (Hectares)",  "Built-up assets exposed to medium or high landslide hazard (% of ADM built-up area)"),
+                          `Drought` = list("Frequency of agricultural drought stress affecting at least 30% of arable land during Season 1/Kharif (percentage of historical period 1984-2022)","Frequency of agricultural drought stress affecting at least 30% of arable land during Season 2/Rabi (percentage of historical period 1984-2022)" ),
+                          `Heat stress` = list("Expected exposure to heat stress (population count)", "Expected exposure to heat stress (% of ADM population)"),
+                          `Air pollution`= list("Expected increase of mortality from air pollution (population count)", "Expected increase of mortality from air pollution (% of ADM population)"),
+                          `Demography` = list("District Population", "Tehsil Population"),
+                          `Agriculture & Built-up Area` = list("Built-up area extent (Ha)", "Agricultural land extent (Ha)", "Tehsil Built-up area extent (Ha)", "Tehsil Agricultural land extent (Ha)")))
 
 
 ################################################################################
@@ -147,7 +147,8 @@ ui <- function(request){
                                       
                                       selectInput("indicator_map",
                                                   "Choose Indicator",
-                                                  choices = hazards_options,
+                                                  choices = indicator_listed,
+                                                    # hazards_options,
                                                   selectize = F),  
                                       conditionalPanel(
                                       condition = "input.domain_map == 'Natural Hazards'",
@@ -174,6 +175,7 @@ ui <- function(request){
                              
                  tabPanel("PTI1", 
                           id="PTI1", 
+                          
                          
                           devPTIpack::mod_ptipage_twocol_ui(
                             id = "pti_mod", 
@@ -354,7 +356,7 @@ ui <- function(request){
                             
                             highchartOutput('bar_chart',
                                             width = '820px',
-                                            height = '500px'),
+                                            height = '680px'),
                             
                             fluidRow(
                               # column(width = 4,
@@ -428,7 +430,7 @@ ui <- function(request){
                           
                           mainPanel(
                             width = 12,
-                            
+                            style="border:1px solid DodgerBlue;",
                             
 tags$p(tags$strong(h4("CLIMATE DASHBOARD"))),
 hr(),
@@ -478,7 +480,9 @@ tags$p(tags$b("This dashboard focuses on disaster risk from floods, heat stress,
                           )
 ),
                             tabPanel("DOCUMENTATAION",
+                                     
                                      mainPanel(
+                                       
                                        br(),
                                        tags$hr(),
                                        h5("Get datasets used in the climate dashboard"),
@@ -551,7 +555,7 @@ source(file.path("tables.R"), local = TRUE)
 ################################################################################
 ################################################################################
 #PTI Help
-source(file.path("PTI_Help.R"), local= TRUE)
+# source(file.path("PTI_Help.R"), local= TRUE)
 #PTI Server Side
   mod_ptipage_newsrv(
     id = "pti_mod",

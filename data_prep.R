@@ -27,7 +27,7 @@ district_shp <-  read_sf("data/shapefile_district/pakistan_indicators.shp") %>%
   st_as_sf() %>% 
   mutate(district = str_remove(district, " Agency")) %>% 
   arrange(district) %>% 
-  st_transform(crs=4326) %>% 
+  st_transform(crs='+proj=longlat +datum=WGS84') %>% #4326
   mutate(polygon = "district")
 
 
@@ -37,7 +37,7 @@ tehsil_shp <- read_sf("data/Tehsils_shp_UNOCHA/pak_admbnda_adm3_ocha_pco_gaul_20
   clean_names() %>% 
   select(province = adm1_en, district = adm2_en, tehsil = adm3_en, geometry) %>% 
   st_as_sf() %>% 
-  st_transform(crs=4326) %>% 
+  st_transform(crs='+proj=longlat +datum=WGS84') %>% 
   mutate(polygon = "tehsil") %>% 
   arrange(tehsil)
 ################################################################################
@@ -290,7 +290,13 @@ data %>%
   mutate(value = 
            case_when(
              indicator_1 == "Population (WorldPop 2020)" ~ round(value, 0),
-             indicator_1 == "District population" ~ round(value, 0),
+             indicator_1 == "Tehsil Population" ~ round(value, 0),
+             indicator_1 == "District Population" ~ round(value, 0),
+             indicator_1 == "Expected mortality from river floods (population count)" ~ round(value, 0),
+             indicator_1 == "Expected mortality from coastal floods (population count)" ~ round(value, 0),
+             indicator_1 == "Population exposed to medium or high landslide hazard (population count)" ~ round(value, 0),
+             indicator_1 == "Expected exposure to heat stress (population count)" ~ round(value, 0),
+             indicator_1 == "Expected increase of mortality from air pollution (population count)" ~ round(value, 0),
              TRUE ~ value
            )) %>% 
   write_rds("CCDR_Dashboard/data/data.RDS")
