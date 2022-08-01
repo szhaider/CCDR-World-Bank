@@ -112,6 +112,8 @@ ui <- function(request){
                                       
                                         .navbar{
                                          margin-bottom: 0px !important;
+                                         margin-left: 1px !important;
+                                         margin-right: 1px !important;
                                         }")),  
              
              tags$head(tags$script(type="text/javascript", src = "wb_img.js")),
@@ -209,11 +211,11 @@ ui <- function(request){
             tabPanel("COMPARISON MAPS",
              # h3("COMPARISON MAPS"),
             # mainPanel(width = 9,
-                          tabsetPanel(
-                            # "COMPARISON MAPS",
-                                      id="my_tab",
-                                       type = c("hidden"),
-                                      tabPanel("my_tab1",
+                          # tabsetPanel(
+                          #   # "COMPARISON MAPS",
+                          #             id="my_tab",
+                          #              type = c("hidden"),
+                          #             tabPanel("my_tab1",
 
                                   
                             sidebarLayout(
@@ -222,7 +224,7 @@ ui <- function(request){
                               style = "background-color: white;
                                opacity: 0.85;  
                                padding: 20px 20px 20px 20px;
-                               margin: auto;
+                               
                                border-radius: 5pt;
                                box-shadow: 0pt 0pt 6pt 0px rgba(61,59,61,0.48);
                                padding-bottom: 2mm;
@@ -275,16 +277,24 @@ ui <- function(request){
                               fluidRow(
                                 column(width = 6,
                                        offset = 0.5,
-                                       style = 'padding-bottom:0px; padding-left:0px; padding-right:2px; margin-left:-7px; position: relative;',
-                                       tags$style(type = 'text/css', '#double_map_1 {height: calc(85vh - 55px) !important;}'),
+                                       style = 'padding-bottom:0px; 
+                                       padding-left:0px; 
+                                       padding-right:0px; 
+                                       margin-left:-10px; 
+                                       position: relative;',
+                                       tags$style(type = 'text/css', '#double_map_1 {height: calc(90vh - 50px) !important;}'),
                               leafletOutput("double_map_1", width = "100%", height = "400px")
                               # %>%
                               # withSpinner()
                               ),
                               column(width = 6,
                                      offset = 0.5,
-                                     style = 'padding-bottom:1px; padding-left:2px; padding-right:2px; position: relative;',
-                                     tags$style(type = 'text/css', '#double_map_2 {height: calc(85vh - 55px) !important;}'),
+                                     style = 'padding-bottom:0px; 
+                                     padding-left:0px; 
+                                     padding-right:5px; 
+                                     margin-right:-1px; 
+                                     position: relative;',
+                                     tags$style(type = 'text/css', '#double_map_2 {height: calc(90vh - 50px) !important;}'),
                                      leafletOutput("double_map_2", width = "100%", height = "400px")
                                      # %>%
                                      #   withSpinner() 
@@ -293,27 +303,37 @@ ui <- function(request){
                               # br(),
                               fluidRow(
                                 column(6,
-                                       offset = 0,
+                                       offset = 0.5,
                                        style =
-                                       "padding-top: 1px;
-                                        padding-left: 1px;
-                                       padding-right:2px;",
-                                       tags$head(tags$style("#source_comp1{color:black; margin-left:-8px; margin-right:1;  font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
+                                       "padding-top:1px;
+                                        padding-left: 0px;
+                                       padding-right:1px;
+                                       position: relative;",
+                                       tags$head(tags$style(
+                                       "#source_comp1{color:black; 
+                                       margin-left:-10px;  
+                                       font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
                                        verbatimTextOutput("source_comp1")),
                                 column(6,
                                        offset = 0,
                                        style = 
                                       "padding-top:1px;   
                                        padding-left:0px;
-                                      padding-right:3px",
-                                       tags$head(tags$style("#source_comp2{color:black; font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
+                                      padding-right:5px;
+                                      margin-left:-10px;
+                                       position: relative;",
+                                       tags$head(tags$style(
+                                       "#source_comp2{color:black; 
+                                       font-size:12px;  
+                                    
+                                      font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
                                        verbatimTextOutput("source_comp2")
 
                                 ))
                             )
                             )
-                          ),
-                           selected = "my_tab1")
+                          # )
+                           # selected = "my_tab1")
                        # )
             ),
                   
