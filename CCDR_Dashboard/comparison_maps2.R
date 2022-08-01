@@ -201,3 +201,14 @@ outputOptions(output, "double_map_2", suspendWhenHidden = FALSE)
                 digits = 2)
     )
 })
+
+# #Source Map 2
+  output$source_comp2 <- renderText({
+    paste0(" MAP 2", 
+           "\n",
+           " Source: ", glue("{ unique(map_data2()$source) }",),
+           "\n",
+           " Definition: ", glue("{ unique(map_data2()$definition) }"))
+    # ,"\n",
+    # "Definition: ",unique(d_c2()$definition)
+  })

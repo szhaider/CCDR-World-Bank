@@ -85,14 +85,14 @@ spatial_level <- unique(data$polygon)
 #User Interface
 ################################################################################
 ui <- function(request){
-         
+ 
                  # tagList(
                  #   waiter_show_on_load(html = spin_loaders(10)),
                  #   # br(),
                  # )
   # tags$style(".recalculating { opacity: inherit !important; }")
   navbarPage("CLIMATE Dashboard",
-             
+             # theme = shinytheme("journal"),
              ####################
              #to suppress error on screen
                  # tags$style(type="text/css",
@@ -104,6 +104,18 @@ ui <- function(request){
                   # header= tagList(
                  #   useShinydashboard()
                  # ),
+                 header=tags$style(HTML("
+                                        .container-fluid{
+                                          padding: 3px !important;
+                                        }
+                                        
+                                      
+                                        .navbar{
+                                         margin-bottom: 0px !important;
+                                        }")),  
+             
+             tags$head(tags$script(type="text/javascript", src = "wb_img.js")),
+             
                  tabPanel("INTERACTIVE MAPS",
                           tabsetPanel(id = "main_page",
                                       type = c("hidden"),
@@ -118,12 +130,12 @@ ui <- function(request){
                           
                           # tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
                           
-                          tags$style(type = 'text/css', '#maps {height: calc(98vh - 100px) !important;}', style= 'padding-top:0px;'),
+                          tags$style(type = 'text/css', '#maps {height: calc(97vh - 100px) !important;}', style= 'padding:0px;'),
                           leafletOutput("maps"),
                            # withSpinner(),
                             
                           br(),
-                          tags$head(tags$style("#source_map{color:black; font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
+                          tags$head(tags$style("#source_map{color:black; font-size:12px; font-style:italic; max-height: 110px; 'padding:0px;'; margin-top:-18px; background: #ffe6cc; }")),
                           
                           verbatimTextOutput("source_map"),
                           
@@ -194,7 +206,7 @@ ui <- function(request){
                  
                  )
                  ),
-                   tabPanel("COMPARISON MAPS",
+            tabPanel("COMPARISON MAPS",
              # h3("COMPARISON MAPS"),
             # mainPanel(width = 9,
                           tabsetPanel(
@@ -263,16 +275,16 @@ ui <- function(request){
                               fluidRow(
                                 column(width = 6,
                                        offset = 0.5,
-                                       style = 'padding-bottom:0px; padding-left:0px; padding-right:5px',
-                                       tags$style(type = 'text/css', '#double_map_1 {height: calc(90vh - 60px) !important;}'),
+                                       style = 'padding-bottom:0px; padding-left:0px; padding-right:2px; margin-left:-7px; position: relative;',
+                                       tags$style(type = 'text/css', '#double_map_1 {height: calc(85vh - 55px) !important;}'),
                               leafletOutput("double_map_1", width = "100%", height = "400px")
                               # %>%
                               # withSpinner()
                               ),
                               column(width = 6,
                                      offset = 0.5,
-                                     style = 'padding-bottom:1px; padding-left:0px; padding-right:1px',
-                                     tags$style(type = 'text/css', '#double_map_2 {height: calc(90vh - 60px) !important;}'),
+                                     style = 'padding-bottom:1px; padding-left:2px; padding-right:2px; position: relative;',
+                                     tags$style(type = 'text/css', '#double_map_2 {height: calc(85vh - 55px) !important;}'),
                                      leafletOutput("double_map_2", width = "100%", height = "400px")
                                      # %>%
                                      #   withSpinner() 
@@ -281,19 +293,19 @@ ui <- function(request){
                               # br(),
                               fluidRow(
                                 column(6,
-                                       offset = 0.5,
+                                       offset = 0,
                                        style =
                                        "padding-top: 1px;
-                                        padding-left: 0px;
-                                       padding-right:5px;",
-                                       tags$head(tags$style("#source_comp1{color:black;  font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
+                                        padding-left: 1px;
+                                       padding-right:2px;",
+                                       tags$head(tags$style("#source_comp1{color:black; margin-left:-8px; margin-right:1;  font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
                                        verbatimTextOutput("source_comp1")),
                                 column(6,
                                        offset = 0,
                                        style = 
                                       "padding-top:1px;   
-                                       padding-left:0.1px;
-                                      padding-right:2px",
+                                       padding-left:0px;
+                                      padding-right:3px",
                                        tags$head(tags$style("#source_comp2{color:black; font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
                                        verbatimTextOutput("source_comp2")
 
@@ -495,6 +507,9 @@ tags$p(tags$b("This dashboard focuses on disaster risk from floods, heat stress,
                                          
                                          downloadButton("download_dev",
                                                         "Development Outcomes",
+                                                        class = "btn-success"),
+                                         downloadButton("download_glossary",
+                                                        "Data Glossary",
                                                         class = "btn-success")
                                        ),
                                        
@@ -506,8 +521,17 @@ tags$p(tags$b("This dashboard focuses on disaster risk from floods, heat stress,
                                        tags$a(href= "https://github.com/szhaider/CCDR-World-Bank.git", "Repo Link", target="_blank"), br(),
                                        
                               
+                            )),
+                              tabPanel("FEEDBACK",
+                                       mainPanel(
+                                         br(),
+                                         h4(strong("Please use the link below to register your valued feedback")),
+                                         br(),
+                                         tags$a(href="https://forms.office.com/Pages/DesignPageV2.aspx?subpage=design&token=00c72e08-32ea-4c7b-ac7b-30930d30b274&id=wP6iMWsmZ0y1bieW2PWcNpMxHt0laMlJu7t4ksK2dhVUOVJJUDI3SFRWOTFBRkVKOU5YRjhBV040Si4u",
+                                                "Register Feedback",
+                                                target="_blank")
+                                       )
                             )
-)
 )
 )
 )

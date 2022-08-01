@@ -126,7 +126,7 @@ tables_climate <- reactive({
            polygon ==   input$table_polygon,
            indicator_1 == input$table_indicator,
            !is.na(value)) %>% 
-  select(province, district, domain, indicator=indicator_1, value, unit, -polygon, -tehsil, -context,-source, -indicator) %>% 
+  select(province, district, domain, indicator=indicator_1, value, unit,source, -polygon, -tehsil, -context, -indicator) %>% 
   janitor::clean_names(case = "title") 
   }else{
     data %>% 
@@ -165,5 +165,5 @@ output$downloadtable <- downloadHandler(
 #Source table
 output$source_table <- renderText({
   
-    paste0("Source : CCDR Pakistan")
+  paste("Source: ", glue("{ unique(tables_climate()$Source) }"))
 })

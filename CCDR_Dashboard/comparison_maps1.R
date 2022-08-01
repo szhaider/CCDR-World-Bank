@@ -226,19 +226,15 @@ labels_map1 <- reactive({
 
 # #Source Map1  
 output$source_comp1 <- renderText({
-  paste0("MAP 1", "\n",
-         "Source: CCDR-Pakistan"
+  paste0(" MAP 1", 
+         "\n",
+         " Source: ", glue("{ unique(map_data1()$source) }"),
+         "\n",
+         " Definition:",  glue("{ unique(map_data1()$definition) }"))
          # , "\n",
          # unique(d_c1()$indicator)
-  )
 })
-# #Source Map 2
-output$source_comp2 <- renderText({
-  paste0("MAP 2", "\n",
-         "Source: CCDR-Pakistan")
-  # ,"\n",
-  # "Definition: ",unique(d_c2()$definition)
-})
+
 
 # 
 # #Screen shot

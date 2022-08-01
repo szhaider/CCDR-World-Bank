@@ -16,4 +16,12 @@ output$download_dev <- downloadHandler(
     file.copy("www/pak_sub_ADM2_handover.xlsx", file)
   }
 )
+
+#Download Data inventory
+output$download_glossary <- downloadHandler(
+  filename = "Data_Inventory.xlsx",
+  content = function(file){
+    file.copy("www/Climate_Dashboard_Inventory.xlsx", file)
+  }
+)
 ################################################################################

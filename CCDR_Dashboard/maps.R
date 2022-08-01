@@ -234,7 +234,9 @@ labels_map <- reactive({
 
 
 output$source_map <- renderText({
-  paste("Source: World Bank CCDR Pakistan")
+  paste(" Source: ", glue("{ unique(map_data()$source) }"), 
+        "\n",
+        "Definition: ", glue("{ unique(map_data()$definition) }"))
 })
 
 observeEvent(input$screenshot,{
