@@ -151,11 +151,22 @@ labels_map <- reactive({
     }
     
   })
- 
-   
+  #quantile(map_data()[,"value"],probs = c(.2,.4,.6,.8,1)
+#input$bins 
+#Choosing Bins  
+# breaks <- reactive({
+#   quantile(
+#   map_data()[,"value"],  
+#   seq(min(map_data()[,"value"]),
+#       max(map_data()[,"value"]), 
+#       
+#       )
+#       )
+# })
+     
   pal <- reactive ({
     colorBin(palette = pal_new(),
-             bins= 5,
+             bins= input$bins,
              na.color = "grey",
              domain = NULL,
                # (map_data()[,"value"]),
@@ -165,9 +176,10 @@ labels_map <- reactive({
   
   })
   
+  
   pal_leg <- reactive ({
       colorBin(palette = pal_new(),
-               bins= 5,
+               bins= input$bins,
                na.color = "grey",
                domain =(map_data()[,"value"]),
                pretty = F,

@@ -172,14 +172,21 @@ ui <- function(request){
                                                     selected = spatial_level[1],
                                                     selectize = F)
                                       ),
+                                      
+                                      # br(),
+                                      numericInput("bins",
+                                                   "Choose Number of Bins",
+                                                   value = 5,
+                                                   min=3,
+                                                   max = 10,
+                                                   step = 1),
                                         # radioButtons("pallettes_fed", ("Change Color Scheme"), inline = TRUE, choices = list("Values"  = "pallette_fed1",
                                         # h6(tags$b(tags$em("Use this button to download the data underlying the current on-screen map"))),
                                         downloadButton("mapdata", "Data", class= "btn-sm"),
                                         actionButton("screenshot", "Image",class="btn-sm", icon=icon("camera")),
                                         actionButton("help_map", "Help", icon= icon('question-circle'), class ="btn-sm"),
                                         br(),
-                                      br(),
-                                      # br(),
+                                      br()
                           )
                  ))),
                  tabPanel("PTI",
@@ -282,7 +289,7 @@ ui <- function(request){
                                        padding-right:0px; 
                                        margin-left:-10px; 
                                        position: relative;',
-                                       tags$style(type = 'text/css', '#double_map_1 {height: calc(90vh - 50px) !important;}'),
+                                       tags$style(type = 'text/css', '#double_map_1 {height: calc(85vh - 50px) !important;}'),
                               leafletOutput("double_map_1", width = "100%", height = "400px")
                               # %>%
                               # withSpinner()
@@ -294,7 +301,7 @@ ui <- function(request){
                                      padding-right:5px; 
                                      margin-right:-1px; 
                                      position: relative;',
-                                     tags$style(type = 'text/css', '#double_map_2 {height: calc(90vh - 50px) !important;}'),
+                                     tags$style(type = 'text/css', '#double_map_2 {height: calc(85vh - 50px) !important;}'),
                                      leafletOutput("double_map_2", width = "100%", height = "400px")
                                      # %>%
                                      #   withSpinner() 
