@@ -136,9 +136,29 @@ outputOptions(output, "double_map_2", suspendWhenHidden = FALSE)
     
   })
   #
+  
+  breaks_map2 <- reactive({
+    req(unique(map_data2()$context) %in% c("negative", "positive"))
+    if(
+      unique(map_data2()$indicator_1) == "Expected mortality from coastal floods (population count)"||
+      unique(map_data2()$indicator_1) == "Expected mortality from coastal floods (% of ADM population)" ||
+      unique(map_data2()$indicator_1) == "Expected damage to built-up assets from coastal floods (hectares)" ||
+      unique(map_data2()$indicator_1) == "Expected damage to built-up assets from coastal floods (% of ADM built-up area)" ||
+      unique(map_data2()$indicator_1) == "Expected exposure to heat stress (% of ADM population)"||
+      unique(map_data2()$indicator_1) == "Expected increase of mortality from air pollution (% of ADM population)"||
+      unique(map_data2()$indicator_1) == "Expected mortality from river floods (% of ADM population)"){
+      
+      seq(min(map_data2()$value), max(map_data2()$value), (max(map_data2()$value)/3))
+    } else {
+      quantile(map_data2()$value, seq(0, 1, 1 / (5)), na.rm = TRUE) %>%
+        unique()
+    }
+  })
+  
   pal2 <- reactive({
     colorBin(palette = pal_new2(),
-             bins= 5, na.color = "grey",
+             bins= breaks_map2(), 
+             na.color = "grey",
              domain = NULL,
              pretty = F,
              reverse=F)
@@ -147,7 +167,8 @@ outputOptions(output, "double_map_2", suspendWhenHidden = FALSE)
   
   pal_leg2 <- reactive({
     colorBin(palette = pal_new2(),
-             bins= 5, na.color = "grey",
+             bins= breaks_map2(), 
+             na.color = "grey",
              domain = map_data2()$value ,
              pretty = F,
              reverse=F)
@@ -198,6 +219,7 @@ outputOptions(output, "double_map_2", suspendWhenHidden = FALSE)
                 },
               opacity= 1,
               labFormat = labelFormat(
+                between = "  :  ",
                 digits = 2)
     )
 })

@@ -152,10 +152,31 @@ labels_map1 <- reactive({
     }
     
   })
+ 
+  #breaks defined
+  #since no variation in coastal floods so using the previous coloring approach instead of quintiles
+  breaks_map1 <- reactive({
+    req(unique(map_data1()$context) %in% c("negative", "positive"))
+    if(
+      unique(map_data1()$indicator_1) == "Expected mortality from coastal floods (population count)"||
+      unique(map_data1()$indicator_1) == "Expected mortality from coastal floods (% of ADM population)" ||
+      unique(map_data1()$indicator_1) == "Expected damage to built-up assets from coastal floods (hectares)" ||
+      unique(map_data1()$indicator_1) == "Expected damage to built-up assets from coastal floods (% of ADM built-up area)" ||
+      unique(map_data1()$indicator_1) == "Expected exposure to heat stress (% of ADM population)"||
+      unique(map_data1()$indicator_1) == "Expected increase of mortality from air pollution (% of ADM population)"||
+      unique(map_data1()$indicator_1) == "Expected mortality from river floods (% of ADM population)"){
+      
+      seq(min(map_data1()$value), max(map_data1()$value), (max(map_data1()$value)/3))
+    } else {
+      quantile(map_data1()$value, seq(0, 1, 1 / (5)), na.rm = TRUE) %>%
+        unique()
+    }
+  })
   
   pal1 <- reactive({
     colorBin(palette = pal_new1(),
-             bins= 5, na.color = "grey",
+             bins= breaks_map1(), 
+             na.color = "grey",
              domain = NULL,
              pretty = F,
              reverse=F)
@@ -164,7 +185,8 @@ labels_map1 <- reactive({
   
   pal_leg1 <- reactive({
     colorBin(palette = pal_new1(),
-             bins= 5, na.color = "grey",
+             bins= breaks_map1(), 
+             na.color = "grey",
              domain = (map_data1()[,"value"]),
              pretty = F,
              reverse=F)
@@ -217,6 +239,7 @@ labels_map1 <- reactive({
                 },
               opacity= 1,
               labFormat = labelFormat(
+                between = "  :  ",
                 digits = 2)
     )
 })

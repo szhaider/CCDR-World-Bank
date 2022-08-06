@@ -26,6 +26,8 @@ library(maptools)
 library(gpclib)
 library(waiter)
 library(leaflet.minicharts)
+
+# library(RColorBrewer)
 # library(manipulateWidget)
 # library(broom)
 # library(webshot)
@@ -174,12 +176,22 @@ ui <- function(request){
                                       ),
                                       
                                       # br(),
+                                      conditionalPanel(
+                                          condition = 
+                                            "input.indicator_map !== 'Expected mortality from coastal floods (population count)'&&
+                                             input.indicator_map !== 'Expected mortality from coastal floods (% of ADM population)'&&
+                                             input.indicator_map !== 'Expected damage to built-up assets from coastal floods (hectares)' &&
+                                             input.indicator_map !== 'Expected damage to built-up assets from coastal floods (% of ADM built-up area)'&&
+                                             input.indicator_map !== 'Expected exposure to heat stress (% of ADM population)'&&
+                                             input.indicator_map !== 'Expected increase of mortality from air pollution (% of ADM population)'&&
+                                             input.indicator_map !== 'Expected mortality from river floods (% of ADM population)'",                                
                                       numericInput("bins",
                                                    "Choose Number of Bins",
                                                    value = 5,
                                                    min=3,
                                                    max = 10,
-                                                   step = 1),
+                                                   step = 1)
+                                      ),
                                         # radioButtons("pallettes_fed", ("Change Color Scheme"), inline = TRUE, choices = list("Values"  = "pallette_fed1",
                                         # h6(tags$b(tags$em("Use this button to download the data underlying the current on-screen map"))),
                                         downloadButton("mapdata", "Data", class= "btn-sm"),
@@ -197,8 +209,7 @@ ui <- function(request){
                  tabPanel("PTI1", 
                           id="PTI1", 
                           
-                         
-                          devPTIpack::mod_ptipage_twocol_ui(
+                 devPTIpack::mod_ptipage_twocol_ui(
                             id = "pti_mod", 
                             map_height = "calc(90vh)", 
                             side_width = "350px", 
@@ -206,10 +217,14 @@ ui <- function(request){
                             show_waiter = FALSE,
                             wt_dwnld_options = c("data", "weights"),
                             map_dwnld_options = c()),
-                          
-                          mainPanel(
-                            verbatimTextOutput("text"),
-                          )
+                
+                          h6(actionLink("pti_link_1",
+                                        "What is the Project Targeting Index (PTI)?")),
+                          h6(actionLink("pti_link_2",
+                                        "How is the PTI constructed, and how should the score be interpreted?"))
+                 # mainPanel(
+                 #   verbatimTextOutput("text"),
+                 # )      
                           
                  )
                  
@@ -606,7 +621,7 @@ source(file.path("tables.R"), local = TRUE)
 ################################################################################
 ################################################################################
 #PTI Help
-# source(file.path("PTI_Help.R"), local= TRUE)
+source(file.path("PTI_Help.R"), local= TRUE)
 #PTI Server Side
   mod_ptipage_newsrv(
     id = "pti_mod",

@@ -143,47 +143,58 @@ labels_map <- reactive({
   pal_new <- reactive({
     req(unique(map_data()$context) %in% c("negative", "positive"))
     if (unique(map_data()$context) == "negative"){
-      c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c')
-      # c("#313695", "#ffffbf", "#d73027")
+      rev(colorRampPalette(colors = c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c'), space = "Lab")(input$bins))
+      # rev(brewer.pal(input$bins, "RdYlBu"))
+       # c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c')
     } else {
-      c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6')
-      # c( "#d73027"  , "#ffffbf", "#313695")
+      colorRampPalette(colors = c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c'), space = "Lab")(input$bins)
+      # brewer.pal(input$bins, "RdYlBu")
+      # c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6')
     }
-    
+
   })
-  #quantile(map_data()[,"value"],probs = c(.2,.4,.6,.8,1)
-#input$bins 
-#Choosing Bins  
-# breaks <- reactive({
-#   quantile(
-#   map_data()[,"value"],  
-#   seq(min(map_data()[,"value"]),
-#       max(map_data()[,"value"]), 
-#       
-#       )
-#       )
-# })
-     
+  
+  
+#breaks defined
+  #since no variation in coastal floods so using the previous coloring approach instead of quintiles
+  breaks <- reactive({
+    req(unique(map_data()$context) %in% c("negative", "positive"))
+    if(
+     unique(map_data()$indicator_1) == "Expected mortality from coastal floods (population count)"||
+     unique(map_data()$indicator_1) == "Expected mortality from coastal floods (% of ADM population)" ||
+     unique(map_data()$indicator_1) == "Expected damage to built-up assets from coastal floods (hectares)" ||
+     unique(map_data()$indicator_1) == "Expected damage to built-up assets from coastal floods (% of ADM built-up area)" ||
+     unique(map_data()$indicator_1) == "Expected exposure to heat stress (% of ADM population)"||
+     unique(map_data()$indicator_1) == "Expected increase of mortality from air pollution (% of ADM population)"||
+     unique(map_data()$indicator_1) == "Expected mortality from river floods (% of ADM population)"){
+      
+      seq(min(map_data()$value), max(map_data()$value), (max(map_data()$value)/3))
+    } else {
+    quantile(map_data()$value, seq(0, 1, 1 / (input$bins)), na.rm = TRUE) %>%
+      unique()
+  }
+  })
+
+    
   pal <- reactive ({
     colorBin(palette = pal_new(),
-             bins= input$bins,
+             bins= breaks(),
              na.color = "grey",
              domain = NULL,
                # (map_data()[,"value"]),
              pretty = F,
-             reverse=F
+             reverse=T
     )
-  
+
   })
-  
-  
+ 
   pal_leg <- reactive ({
       colorBin(palette = pal_new(),
-               bins= input$bins,
+               bins= breaks(),
                na.color = "grey",
-               domain =(map_data()[,"value"]),
-               pretty = F,
-               reverse=F
+               domain = map_data()[,"value"],
+              pretty = FALSE,
+               reverse=T
       )
   })
   
@@ -213,7 +224,7 @@ labels_map <- reactive({
                 opacity = 1,
                 fill = TRUE,
                 dashArray = NULL,
-                smoothFactor = 0.5,
+                smoothFactor = .9,
                 highlightOptions = highlightOptions(weight= 5,
                                                     fillOpacity = 1,
                                                     opacity= 1,
@@ -240,7 +251,14 @@ labels_map <- reactive({
                 },
               opacity= 1,
               labFormat = labelFormat(
-                digits = 2))
+                between = "  :  ",
+                digits = 2,
+                transform = function(x)  {
+                  x
+                  # paste0(min(x),":", max(x))
+                  }
+              )
+              )
 
 })
 
