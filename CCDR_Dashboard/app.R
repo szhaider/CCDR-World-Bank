@@ -298,25 +298,43 @@ ui <- function(request){
                               width = 9,
                               fluidRow(
                                 column(width = 6,
-                                       offset = 0.5,
-                                       style = 'padding-bottom:0px; 
+                                       offset = 0,
+                                       style = 
+                                       'padding-bottom:0px; 
                                        padding-left:0px; 
                                        padding-right:0px; 
                                        margin-left:-10px; 
                                        position: relative;',
                                        tags$style(type = 'text/css', '#double_map_1 {height: calc(85vh - 50px) !important;}'),
-                              leafletOutput("double_map_1", width = "100%", height = "400px")
+                                       leafletOutput("double_map_1", width = "100%", height = "400px"),
+                                       # absolutePanel(id = "controls_1", class = "panel panel-default", fixed= TRUE,
+                                       #               draggable = FALSE, bottom = "auto", right = "auto", left = 330, top = 90,
+                                       #               width = 150, height = "auto",
+                                       #               style = "background-color: white;
+                                       #             opacity: 0.75;
+                                       #             padding: 5px 5px 5px 5px;
+                                       #             margin: auto;
+                                       #             border-radius: 1pt;
+                                       #             box-shadow: 0pt 0pt 0pt 0px rgba(61,59,61,0.48);
+                                       #             padding-bottom: 0mm;
+                                       #             padding-top: 0mm;",
+                                       # numericInput("bins_map1", "Select number of bins",value= 5, min = 3, max = 10, step=1)
+                                       # )
+                             
                               # %>%
                               # withSpinner()
                               ),
                               column(width = 6,
-                                     offset = 0.5,
-                                     style = 'padding-bottom:0px; 
-                                     padding-left:0px; 
-                                     padding-right:5px; 
-                                     margin-right:-1px; 
-                                     position: relative;',
+                                     offset = 0,
+                                     style = 
+                                       'padding-bottom:0px; 
+                                       padding-left:2px; 
+                                       padding-right:2px; 
+                                       margin-left:0px;
+                                       margin-right:5px;
+                                       position: relative;',
                                      tags$style(type = 'text/css', '#double_map_2 {height: calc(85vh - 50px) !important;}'),
+                                     # tags$style(type="text/css", "#double_map_2.recalculating { opacity: 1.0; }"),
                                      leafletOutput("double_map_2", width = "100%", height = "400px")
                                      # %>%
                                      #   withSpinner() 
@@ -325,31 +343,34 @@ ui <- function(request){
                               # br(),
                               fluidRow(
                                 column(6,
-                                       offset = 0.5,
+                                       offset = 0,
                                        style =
                                        "padding-top:1px;
-                                        padding-left: 0px;
-                                       padding-right:1px;
+                                       padding-bottom:0px; 
+                                        padding-left:0px;
+                                       padding-right:0px;
                                        position: relative;",
                                        tags$head(tags$style(
                                        "#source_comp1{color:black; 
                                        margin-left:-10px;  
                                        font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
+                                       tags$style(type = 'text/css', '#source_comp1 {height: calc(85vh - 50px) !important;}'),
                                        verbatimTextOutput("source_comp1")),
                                 column(6,
                                        offset = 0,
                                        style = 
-                                      "padding-top:1px;   
-                                       padding-left:0px;
-                                      padding-right:5px;
-                                      margin-left:-10px;
-                                       position: relative;",
+                                    'padding-bottom:0px; 
+                                    padding-top:1px;
+                                     padding-left:2px; 
+                                     padding-right:2px; 
+                                     
+                                     margin-left:0px;
+                                     position: relative;',
                                        tags$head(tags$style(
                                        "#source_comp2{color:black; 
-                                       font-size:12px;  
-                                    
-                                      font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
-                                       verbatimTextOutput("source_comp2")
+                                       font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
+                                    tags$style(type = 'text/css', '#source_comp2 {height: calc(85vh - 50px) !important;}'),   
+                                    verbatimTextOutput("source_comp2")
 
                                 ))
                             )

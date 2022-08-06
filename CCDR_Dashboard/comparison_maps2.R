@@ -135,7 +135,6 @@ outputOptions(output, "double_map_2", suspendWhenHidden = FALSE)
     }
     
   })
-  #
   
   breaks_map2 <- reactive({
     req(unique(map_data2()$context) %in% c("negative", "positive"))
