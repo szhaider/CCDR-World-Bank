@@ -184,7 +184,13 @@ ui <- function(request){
                                              input.indicator_map !== 'Expected damage to built-up assets from coastal floods (% of ADM built-up area)'&&
                                              input.indicator_map !== 'Expected exposure to heat stress (% of ADM population)'&&
                                              input.indicator_map !== 'Expected increase of mortality from air pollution (% of ADM population)'&&
-                                             input.indicator_map !== 'Expected mortality from river floods (% of ADM population)'",                                
+                                             input.indicator_map !== 'Expected mortality from river floods (% of ADM population)'&&
+                                          input.indicator_map !== 'Expected mortality from river floods (population count)'&&
+                                          input.indicator_map !== 'Expected damage to built-up assets from river floods (% of ADM built-up area)'&&
+                                          input.indicator_map !== 'Built-up assets exposed to medium or high landslide hazard (% of ADM built-up area)'&&
+                                          input.indicator_map !== 'Built-up assets exposed to medium or high landslide hazard (Hectares)'&&
+                                          input.indicator_map !== 'Population exposed to medium or high landslide hazard (% of ADM population)'&&
+                                          input.indicator_map !== 'Population exposed to medium or high landslide hazard (population count)'",                                
                                       numericInput("bins",
                                                    "Choose Number of Bins",
                                                    value = 5,
@@ -430,7 +436,7 @@ ui <- function(request){
                             # width = 8,
                             
                             highchartOutput('bar_chart',
-                                            width = '820px',
+                                            width = '950px',
                                             height = '680px'),
                             
                             fluidRow(
