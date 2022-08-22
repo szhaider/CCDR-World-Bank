@@ -244,6 +244,11 @@ development_indicators <- readxl::read_excel("data/pak_sub_ADM2_handover.xlsx", 
          `Access to improved toilet facilities (PSLM 2019)` = `Access to improved toilet facilities (PSLM 2019)`/100,
          `Access to improved toilet facilities (PSLM 2014/2019)`= `Access to improved toilet facilities (PSLM 2014/2019)`/100,
          ) %>% 
+  #
+  rename(`Road Density (OpenStreetMap 2021)` = `Road Density`,
+         `Road density normalised (OpenStreetMap 2021)` = `Road density normalised`,
+         `Share of population Living in Area with Low Road Density (OpenStreetMap 2022)`  = `Share of population Living in Area with Low Road Density` 
+           ) %>% 
   mutate_if(is.numeric, multiply100) %>%
   pivot_longer(`Population (WorldPop 2020)`:`Lack of access to improved toilet facilities (PSLM 2014/2019)`,
                names_to = "indicator", 

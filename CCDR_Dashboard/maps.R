@@ -166,13 +166,19 @@ labels_map <- reactive({
      unique(map_data()$indicator_1) == "Expected damage to built-up assets from coastal floods (% of ADM built-up area)" ||
      unique(map_data()$indicator_1) == "Expected exposure to heat stress (% of ADM population)"||
      unique(map_data()$indicator_1) == "Expected increase of mortality from air pollution (% of ADM population)"||
-     unique(map_data()$indicator_1) == "Expected mortality from river floods (% of ADM population)"){
+     unique(map_data()$indicator_1) == "Expected mortality from river floods (% of ADM population)"||
+     unique(map_data()$indicator_1) == "Expected mortality from river floods (population count)"||
+     unique(map_data()$indicator_1) == "Expected damage to built-up assets from river floods (% of ADM built-up area)"||
+     unique(map_data()$indicator_1) == "Built-up assets exposed to medium or high landslide hazard (% of ADM built-up area)"||
+     unique(map_data()$indicator_1) == "Built-up assets exposed to medium or high landslide hazard (Hectares)"||
+     unique(map_data()$indicator_1) == "Population exposed to medium or high landslide hazard (% of ADM population)"||
+     unique(map_data()$indicator_1) == "Population exposed to medium or high landslide hazard (population count)"){
       
       seq(min(map_data()$value), max(map_data()$value), (max(map_data()$value)/3))
     } else {
     quantile(map_data()$value, seq(0, 1, 1 / (input$bins)), na.rm = TRUE) %>%
       unique()
-  }
+    }
   })
 
     

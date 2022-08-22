@@ -128,14 +128,14 @@ hc_bar
 })
 
 
-output$labels_bar <- renderText({
-  unit_bar <- reactive({
-    bar_chart_data() %>% 
-    distinct(unit) %>% 
-    pull(unit)
-  })
-  paste0("Units: ", unit_bar())
-})
+# output$labels_bar <- renderText({
+#   unit_bar <- reactive({
+#     bar_chart_data() %>% 
+#     distinct(unit) %>% 
+#     pull(unit)
+#   })
+#   paste0("Units: ", unit_bar())
+# })
 
 
   
