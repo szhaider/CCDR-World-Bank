@@ -174,7 +174,9 @@ labels_map <- reactive({
      unique(map_data()$indicator_1) == "Population exposed to medium or high landslide hazard (% of ADM population)"||
      unique(map_data()$indicator_1) == "Population exposed to medium or high landslide hazard (population count)"){
       
-      seq(min(map_data()$value), max(map_data()$value), (max(map_data()$value)/3))
+      seq(min(map_data()$value), 
+          max(map_data()$value), 
+          (max(map_data()$value)/3))
     } else {
     quantile(map_data()$value, seq(0, 1, 1 / (input$bins)), na.rm = TRUE) %>%
       unique()

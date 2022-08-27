@@ -34,6 +34,7 @@ library(leaflet.minicharts)
 # install_phantomjs()
 suppressWarnings(gpclibPermit())
 
+library(ClimatePCA)
 
 
 ################################################################################
@@ -82,6 +83,16 @@ spatial_level <- unique(data$polygon)
                           `Agriculture & Built-up Area` = list("Built-up area extent (Ha)", "Agricultural land extent (Ha)", "Tehsil Built-up area extent (Ha)", "Tehsil Agricultural land extent (Ha)")))
 
 
+ legend <- readRDS("data/legend")
+ districts <- readRDS("data/districts")
+ data_pca <- readRDS("data/data_pca")
+ #Feature choices
+ mychoices <- list(
+   `Survey Data` = c(names(data_pca[2:34])),
+   `Geospatial Data` = c
+   (names(data_pca[35:56]))
+ )
+ 
 ################################################################################
 
 #User Interface
@@ -236,6 +247,60 @@ ui <- function(request){
                  
                  )
                  ),
+            # tabPanel("PCA",
+            #            ClimatePCA::run_app()
+            #            ),
+            tabPanel("PCA",
+                     sidebarLayout(
+                       sidebarPanel(
+                         width = 3,
+                         style = "background-color: white;",
+                         tags$strong(tags$em(tags$h6("Select the features to compute the Geographic Targeting Index based on Principal Component Analysis (PC1)"))),
+                         shinyWidgets::pickerInput("features_selected",
+                                                   "Select featues for PCA",
+                                                   choices =  mychoices,
+                                                   selected = mychoices[1],
+                                                   options = list(
+                                                     `actions-box` = TRUE),
+                                                   multiple=TRUE),
+                         
+                         br(),
+                         # br(),
+                         # Variance graph of the PCs selected
+                         
+                         shiny::plotOutput("var_explained_pcs",
+                                           height = "150px",
+                                           width = '100%'),
+                         br(),
+                         shiny::fluidRow(shiny::actionButton("pca_help",
+                                                             "HELP",
+                                                             icon= icon("help"),
+                                                             class = "btn-sm")),
+                         br(),
+                         shiny::fluidRow(shiny::downloadLink("pca_download",
+                                                             "Download PCA",
+                                                             icon= icon("download"),
+                                                             class = "btn-sm"))
+                       ),
+                       
+                       
+                       shiny::mainPanel(
+                         width = 9,
+                         tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
+                         tags$style(type = "text/css", "#main_map {height: calc(100vh - 80px) !important;}"),
+                         
+                         leaflet::leafletOutput("main_map",
+                                                height = '100vh',
+                                                width = "75.5vw"
+                         ),
+                         
+                         tags$style(' #main_map {
+                        position: relative;
+                        margin-left: -26px;
+                        padding: 0px;
+                        }')
+                       )
+                     )),
             tabPanel("COMPARISON MAPS",
              # h3("COMPARISON MAPS"),
             # mainPanel(width = 9,
@@ -644,6 +709,9 @@ source(file.path('bar_charts.R'), local = TRUE)
 ################################################################################
 #Main Tables
 source(file.path("tables.R"), local = TRUE)  
+         
+#PCA
+source(file.path("pca.R"), local = TRUE)         
 
 ################################################################################
 ################################################################################
