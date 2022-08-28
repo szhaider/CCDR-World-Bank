@@ -3,7 +3,7 @@
 library(shiny)
 library(dplyr)
 library(tidyr)
-# library(ggplot2)
+ library(ggplot2)
 # library(plotly)
 # library(scales)
 # library(forcats)
@@ -34,9 +34,9 @@ library(leaflet.minicharts)
 # install_phantomjs()
 suppressWarnings(gpclibPermit())
 
-library(ClimatePCA)
+# library(ClimatePCA)
 
-
+theme_set(theme_light())
 ################################################################################
 #Read in Data
 # Shape File (Both District + Tehsil)
@@ -272,15 +272,35 @@ ui <- function(request){
                                            height = "150px",
                                            width = '100%'),
                          br(),
-                         shiny::fluidRow(shiny::actionButton("pca_help",
-                                                             "HELP",
-                                                             icon= icon("help"),
-                                                             class = "btn-sm")),
+                         # absolutePanel(id="pca_bins_panel", 
+                         #               top=100, 
+                         #               left ="auto" , 
+                         #               bottom ="auto" , 
+                         #               right =100 , 
+                         #               draggable = T,
+                         #               
+                                       numericInput("bins_pca",
+                                                    "Choose Number of Bins",
+                                                    value = 5,
+                                                    min=3, 
+                                                    max = 10, 
+                                                    step = 1),
+                         
+                         # ),
+                         # shiny::fluidRow(shiny::actionButton("pca_help",
+                         #                                     "HELP",
+                         #                                     icon= icon("help"),
+                         #                                     class = "btn-sm")),
                          br(),
                          shiny::fluidRow(shiny::downloadLink("pca_download",
-                                                             "Download PCA",
+                                                             "Download PCA (xlsx)",
                                                              icon= icon("download"),
-                                                             class = "btn-sm"))
+                                                             class = "btn-sm")),
+                         br(),
+                         h6(actionLink("pca_link_1",
+                                       "What are the PCA Scores?")),
+                         h6(actionLink("pca_link_2",
+                                       "How is the PCA constructed, and how should the score be interpreted?"))
                        ),
                        
                        
@@ -288,6 +308,8 @@ ui <- function(request){
                          width = 9,
                          tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
                          tags$style(type = "text/css", "#main_map {height: calc(100vh - 80px) !important;}"),
+                         
+                         
                          
                          leaflet::leafletOutput("main_map",
                                                 height = '100vh',
@@ -299,6 +321,7 @@ ui <- function(request){
                         margin-left: -26px;
                         padding: 0px;
                         }')
+                         
                        )
                      )),
             tabPanel("COMPARISON MAPS",

@@ -103,34 +103,66 @@ labels_map_1 <- reactive({
     lapply(htmltools::HTML)
 })
 
+pal_new_pca <- reactive({
+  req(input$bins_pca)
+  # req(unique(map_data()$context) %in% c("negative", "positive"))
+  # if (unique(map_data()$context) == "negative"){
+    rev(colorRampPalette(colors = c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c'), space = "Lab")(input$bins_pca))
+    # rev(brewer.pal(input$bins, "RdYlBu"))
+    # c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c')
+  # } else {
+    # colorRampPalette(colors = c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c'), space = "Lab")(input$bins)
+    # brewer.pal(input$bins, "RdYlBu")
+    # c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6')
+  # }
+  
+})
+
+#breaks defined
+breaks_pca <- reactive({
+  req(input$bins_pca)
+   # req(unique(map_data()$context) %in% c("negative", "positive"))
+  quantile(map_data_pca()$PC1, seq(0, 1, 1 / (input$bins_pca)), na.rm = TRUE) %>%
+      unique()
+
+})
+
 pal_pca <- reactive ({
-  leaflet::colorBin(palette =  c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c'),
-                    bins= 5,
+  leaflet::colorBin(palette =  pal_new_pca(),
+                      # c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c'),
+                    # bins= 5,
+                    bins = breaks_pca(),
                     na.color = "grey",
                     domain = NULL,
                     map_data_pca()[,"PC1"],
                     pretty = F,
-                    reverse=F
+                    reverse=T
   )
   
 })
 
 # Pal_legend
 pal_leg_pca <- reactive ({
-  leaflet::colorBin(palette = c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c'),
-                    bins= 5,
+  leaflet::colorBin(palette = pal_new_pca(),
+                      # c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c'),
+                    bins= breaks_pca(),
                     na.color = "grey",
                     domain =(map_data_pca()[,"PC1"]),
                     pretty = F,
-                    reverse=F
+                    reverse=T
+                   
   )
 })
 
 #Dynamic leaflet
-shiny::observeEvent(input$features_selected,{
+# shiny::observeEvent(input$features_selected,{
+observe({
+  
+  req(input$bins_pca) || req(input$features_selected)
   
   leaflet::leafletProxy("main_map", data=pti_shps1(),
                         deferUntilFlush = TRUE) %>%
+    removeControl("legend") %>% 
     leaflet::clearShapes() %>%
     leaflet::addPolygons(label= labels_map_1(),
                          labelOptions = leaflet::labelOptions(
@@ -159,18 +191,52 @@ shiny::observeEvent(input$features_selected,{
                                                                       bringToFront = TRUE),
                          group = "Polygons")
   
+    
+  labels_pca_legend <- str_c("Priority", " ", seq(1, input$bins_pca))  %>% 
+  rev()
+  
+  labels_pca_legend[[length(labels_pca_legend)]] <-
+    str_c(labels_pca_legend[[length(labels_pca_legend)]]," ", "(top priority)")
+  
+  if(any(is.na(map_data_pca()$PC1))){
+    labels_pca_legend <- append("No data (NA)", labels_pca_legend)
+  }
+  
+  if(any(is.na(map_data_pca()$PC1))){
+    pal_new_pca_updated <- reactive(append(pal_new_pca(), "grey"))
+  }else{
+    pal_new_pca_updated <- reactive(pal_new_pca())
+  }
+  
   
   leaflet::leafletProxy("main_map", data= map_data_pca()) %>%
+ 
     leaflet::clearControls() %>%
-    leaflet::addLegend("bottomright",
-                       pal= pal_leg_pca(),
+    leaflet::addLegend("bottomleft",
+                       # pal= pal_leg_pca(),
                        values= map_data_pca()$PC1,
+                       colors = (pal_new_pca_updated()),
+                       labels = rev(labels_pca_legend),
                        title = "PCA Scores",
                        opacity= 1,
-                       labFormat = leaflet::labelFormat(
-                         between = " : ",
-                         digits = 2)
+                       layerId = "legend"
+                       # labelFormat(
+                       #   # leaflet::labelFormat(
+                       #   # between = " : ",
+                       #   # digits = 2,
+                       #   function(x) {
+                       #   paste0(labels_pca_legend) 
+                       #  }
+                       #  #        if (input$bins_pca == 5) {
+                       #  #          c("Priority1","Priority2", "Priority3", "Priority4", "Priority5")
+                       #  #        }else if(input$bins_pca == 4){
+                       #  #          c("Priority1","Priority2", "Priority3", "Priority4")
+                       #  #        }
+                       #  #      }
+                       #     )
     )
+                         
+    
 })
 
 #Plot for PCs
@@ -202,8 +268,13 @@ output$var_explained_pcs <- shiny::renderPlot({
     # geom_point(aes(component,percent_var))+
     ggplot2::labs(x="Principal Components",
                   y="Variane Explained")+
-    ggplot2::scale_y_continuous(labels = scales::percent_format())
-  
+    ggplot2::scale_y_continuous(labels = scales::percent_format())+
+    theme(
+        axis.line = element_line(color='black'),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank())
 })
 
 output$pca_download <- downloadHandler(
