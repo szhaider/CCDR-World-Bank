@@ -212,7 +212,7 @@ observe({
   leaflet::leafletProxy("main_map", data= map_data_pca()) %>%
  
     leaflet::clearControls() %>%
-    leaflet::addLegend("bottomleft",
+    leaflet::addLegend("bottomright",
                        # pal= pal_leg_pca(),
                        values= map_data_pca()$PC1,
                        colors = (pal_new_pca_updated()),

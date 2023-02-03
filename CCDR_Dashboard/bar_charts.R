@@ -73,9 +73,6 @@ if(input$domain_bar == "Natural Hazards" & input$polygon_bar == "District"){
   })
 })
 
-
-
-
 bar_chart_data <- function(){
 data %>% 
  filter(
@@ -84,48 +81,61 @@ data %>%
         domain == input$domain_bar,
         indicator_1 == input$indicator_bar,
         !is.na(value)) %>% 
-    arrange(desc(value))
+     arrange(desc(value))
 }
 
-#HighChart
-output$bar_chart <- renderHighchart({
-
-if(input$polygon_bar == "District"){  
-hc_bar <- highchart() %>% 
-  hc_xAxis(categories = bar_chart_data()$district) %>% #title = list(text= input$description_bar)
-  hc_chart(type='column',inverted=T) %>% 
-  hc_add_series(name =  input$indicator_bar, bar_chart_data()$value) %>%
-  # hc_yAxis(title = list(text = input$year_bar)) %>% 
-  hc_plotOptions(series = list(hover= list(enabled= TRUE, linewidth = 10, color= "red"))) %>% 
-  hc_labels(title = list(text= input$domain_bar)) %>% 
-  hc_title(text=input$province_bar) %>% 
-  hc_subtitle(text = "Source: CCDR Pakistan") %>% 
-  hc_exporting(enabled = T,
-               filename= input$domain_bar, 
-               buttons = list(contextButton = list(menuItems = c("downloadPNG", "downloadJPEG", "downloadCSV", "downloadXLS", "downloadPDF", "downloadSVG"))))  # %>% 
-#   export_hc("bar_chart.js")
-# 
-}else{
-  hc_bar <- highchart() %>% 
-    hc_xAxis(categories = bar_chart_data()$tehsil) %>% #title = list(text= input$description_bar)
-    hc_chart(type='column',inverted=T) %>% 
-    hc_add_series(name =  input$indicator_bar, bar_chart_data()$value) %>%
-    # hc_yAxis(title = list(text = input$year_bar)) %>% 
-    hc_plotOptions(series = list(hover= list(enabled= TRUE, linewidth = 10, color= "red"))) %>% 
-    hc_labels(title = list(text= input$domain_bar)) %>% 
-    hc_title(text=input$province_bar) %>% 
-    hc_subtitle(text = "Source: CCDR Pakistan") %>% 
-    hc_exporting(enabled = T,
-                 filename= input$domain_bar, 
-                 buttons = list(contextButton = list(menuItems = c("downloadPNG", "downloadJPEG", "downloadCSV", "downloadXLS", "downloadPDF", "downloadSVG"))))  # %>% 
-  #   export_hc("bar_chart.js")
-  # 
-}
-  
-hc_bar
-
-
+##Bar chart
+output$bar_chart <- renderPlot({
+   if(input$polygon_bar == "District"){
+    bar_chart_data() %>%
+      mutate(district = fct_reorder(district , value)) %>%
+      ggplot(aes(y=district, x=value)) +
+      geom_col(fill="midnightblue")+
+       labs(y="", x= input$indicator_bar)
+   }else{
+     bar_chart_data() %>%
+       mutate(tehsil = fct_reorder(tehsil , value)) %>%
+       ggplot(aes(y=tehsil, x=value))+
+       geom_col(fill="midnightblue")+
+       labs(y="", x= input$indicator_bar)
+   }
 })
+
+####
+# High charter graph replaced with ggplot2 (enable for highchart)
+
+##HighChart
+# output$bar_chart <- renderHighchart({
+# 
+# if(input$polygon_bar == "District"){
+# hc_bar <- highchart() %>%
+#   hc_xAxis(categories = bar_chart_data()$district) %>% #title = list(text= input$description_bar)
+#   hc_chart(type='column',inverted=T) %>%
+#   hc_add_series(name =  input$indicator_bar, bar_chart_data()$value) %>%
+#   hc_plotOptions(series = list(hover= list(enabled= TRUE, linewidth = 10, color= "red"))) %>%
+#   hc_labels(title = list(text= input$domain_bar)) %>%
+#   hc_title(text=input$province_bar) %>%
+#   hc_subtitle(text = "Source: CCDR Pakistan") %>%
+#   hc_exporting(enabled = T,
+#                filename= input$domain_bar,
+#                buttons = list(contextButton = list(menuItems = c("downloadPNG", "downloadJPEG", "downloadCSV", "downloadXLS", "downloadPDF", "downloadSVG"))))  # %>%
+# }else{
+#   hc_bar <- highchart() %>%
+#     hc_xAxis(categories = bar_chart_data()$tehsil) %>% #title = list(text= input$description_bar)
+#     hc_chart(type='column',inverted=T) %>%
+#     hc_add_series(name =  input$indicator_bar, bar_chart_data()$value) %>%
+#     hc_plotOptions(series = list(hover= list(enabled= TRUE, linewidth = 10, color= "red"))) %>%
+#     hc_labels(title = list(text= input$domain_bar)) %>%
+#     hc_title(text=input$province_bar) %>%
+#     hc_subtitle(text = "Source: CCDR Pakistan") %>%
+#     hc_exporting(enabled = T,
+#                  filename= input$domain_bar,
+#                  buttons = list(contextButton = list(menuItems = c("downloadPNG", "downloadJPEG", "downloadCSV", "downloadXLS", "downloadPDF", "downloadSVG"))))  # %>%
+# }
+# 
+# hc_bar
+# 
+# })
 
 
 # output$labels_bar <- renderText({

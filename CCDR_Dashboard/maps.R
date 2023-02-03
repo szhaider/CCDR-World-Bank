@@ -56,12 +56,25 @@ observeEvent(input$domain_map,{
 observeEvent(input$domain_map,{   #Latest to stop tehsil option to show up in districts when come back from development to hazards
 observeEvent(input$polygon_map,{
   if(input$polygon_map == "District" & input$domain_map == "Natural Hazards"){
-    dis_haz_choices =                     (list(`River flooding` = list("Expected mortality from river floods (population count)", "Expected mortality from river floods (% of ADM population)", "Expected damage to built-up assets from river floods (hectares)", "Expected damage to built-up assets from river floods (% of ADM built-up area)", "Expected exposure of agricultural land to river floods (hectares)", "Expected exposure of agricultural land to river floods (% of ADM agricultural land)"),
-                                                `Coastal flooding` = list("Expected mortality from coastal floods (population count)", "Expected damage to built-up assets from coastal floods (hectares)", "Expected damage to built-up assets from coastal floods (% of ADM built-up area)"),   #"Expected mortality from coastal floods (% of ADM population)",
-                                                `Landslides` = list("Population exposed to medium or high landslide hazard (population count)", "Population exposed to medium or high landslide hazard (% of ADM population)","Built-up assets exposed to medium or high landslide hazard (Hectares)",  "Built-up assets exposed to medium or high landslide hazard (% of ADM built-up area)"),
-                                                `Drought` = list("Frequency of agricultural drought stress affecting at least 30% of arable land during Season 1/Kharif (percentage of historical period 1984-2022)","Frequency of agricultural drought stress affecting at least 30% of arable land during Season 2/Rabi (percentage of historical period 1984-2022)" ),
-                                                `Heat stress` = list("Expected exposure to heat stress (population count)", "Expected exposure to heat stress (% of ADM population)"),
-                                                `Air pollution`= list("Expected increase of mortality from air pollution (population count)", "Expected increase of mortality from air pollution (% of ADM population)"),
+    dis_haz_choices =                           (list(`River flooding` = list("Expected mortality from river floods (population count)",
+                                                                        "Expected mortality from river floods (% of ADM population)", 
+                                                                        "Expected damage to built-up assets from river floods (hectares)",
+                                                                        "Expected damage to built-up assets from river floods (% of ADM built-up area)", 
+                                                                        "Expected exposure of agricultural land to river floods (hectares)",
+                                                                        "Expected exposure of agricultural land to river floods (% of ADM agricultural land)"),
+                                                `Coastal flooding` = list("Expected mortality from coastal floods (population count)", 
+                                                                          "Expected damage to built-up assets from coastal floods (hectares)", 
+                                                                          "Expected damage to built-up assets from coastal floods (% of ADM built-up area)"),   #"Expected mortality from coastal floods (% of ADM population)",
+                                                `Landslides` = list("Population exposed to medium or high landslide hazard (population count)",
+                                                                    "Population exposed to medium or high landslide hazard (% of ADM population)",
+                                                                    "Built-up assets exposed to medium or high landslide hazard (Hectares)", 
+                                                                    "Built-up assets exposed to medium or high landslide hazard (% of ADM built-up area)"),
+                                                `Drought` = list("Frequency of agricultural drought stress affecting at least 30% of arable land during Season 1/Kharif (percentage of historical period 1984-2022)",
+                                                                 "Frequency of agricultural drought stress affecting at least 30% of arable land during Season 2/Rabi (percentage of historical period 1984-2022)" ),
+                                                `Heat stress` = list("Expected exposure to heat stress (population count)",
+                                                                     "Expected exposure to heat stress (% of ADM population)"),
+                                                `Air pollution`= list("Expected increase of mortality from air pollution (population count)", 
+                                                                      "Expected increase of mortality from air pollution (% of ADM population)"),
                                                 `Demography` = list("District Population"),
                                                 `Agriculture & Built-up Area` = list("Built-up area extent (Ha)", "Agricultural land extent (Ha)")))
     
@@ -138,8 +151,6 @@ labels_map <- reactive({
   }
 })
 
-
-
   pal_new <- reactive({
     req(unique(map_data()$context) %in% c("negative", "positive"))
     if (unique(map_data()$context) == "negative"){
@@ -162,28 +173,38 @@ labels_map <- reactive({
     if(
      unique(map_data()$indicator_1) == "Expected mortality from coastal floods (population count)"||
      unique(map_data()$indicator_1) == "Expected mortality from coastal floods (% of ADM population)" ||
-     unique(map_data()$indicator_1) == "Expected damage to built-up assets from coastal floods (hectares)" ||
-     unique(map_data()$indicator_1) == "Expected damage to built-up assets from coastal floods (% of ADM built-up area)" ||
-     unique(map_data()$indicator_1) == "Expected exposure to heat stress (% of ADM population)"||
-     unique(map_data()$indicator_1) == "Expected increase of mortality from air pollution (% of ADM population)"||
-     unique(map_data()$indicator_1) == "Expected mortality from river floods (% of ADM population)"||
-     unique(map_data()$indicator_1) == "Expected mortality from river floods (population count)"||
-     unique(map_data()$indicator_1) == "Expected damage to built-up assets from river floods (% of ADM built-up area)"||
-     unique(map_data()$indicator_1) == "Built-up assets exposed to medium or high landslide hazard (% of ADM built-up area)"||
-     unique(map_data()$indicator_1) == "Built-up assets exposed to medium or high landslide hazard (Hectares)"||
-     unique(map_data()$indicator_1) == "Population exposed to medium or high landslide hazard (% of ADM population)"||
-     unique(map_data()$indicator_1) == "Population exposed to medium or high landslide hazard (population count)"){
-      
-      seq(min(map_data()$value), 
-          max(map_data()$value), 
+    
+     # unique(map_data()$indicator_1) == "Expected exposure to heat stress (% of ADM population)"||
+      unique(map_data()$indicator_1) == "Expected increase of mortality from air pollution (% of ADM population)"
+     ){
+
+      seq(min(map_data()$value),
+          max(map_data()$value),
           (max(map_data()$value)/3))
-    } else {
-    quantile(map_data()$value, seq(0, 1, 1 / (input$bins)), na.rm = TRUE) %>%
+    }
+      else if( unique(map_data()$indicator_1) == "Expected damage to built-up assets from coastal floods (% of ADM built-up area)" ||
+               unique(map_data()$indicator_1) == "Expected damage to built-up assets from coastal floods (hectares)"){
+        seq(min(map_data()$value),
+            max(map_data()$value),
+            (max(map_data()$value)/2))
+        
+      } else if(unique(map_data()$indicator_1) == "Expected mortality from river floods (% of ADM population)"||
+              unique(map_data()$indicator_1) == "Expected mortality from river floods (population count)"||
+              unique(map_data()$indicator_1) == "Expected damage to built-up assets from river floods (% of ADM built-up area)"){
+        quantile(map_data()$value, seq(0, 1, 1 / (7)), na.rm = TRUE) %>%
+          unique()
+        
+      }else if(unique(map_data()$indicator_1) == "Built-up assets exposed to medium or high landslide hazard (% of ADM built-up area)"||
+              unique(map_data()$indicator_1) == "Built-up assets exposed to medium or high landslide hazard (Hectares)"||
+              unique(map_data()$indicator_1) == "Population exposed to medium or high landslide hazard (% of ADM population)"||
+              unique(map_data()$indicator_1) == "Population exposed to medium or high landslide hazard (population count)"){
+      quantile(map_data()$value, seq(0, 1, 1 / (8)), na.rm = TRUE) %>%
+        unique()
+    } else{ quantile(map_data()$value, seq(0, 1, 1 / (input$bins)), na.rm = TRUE) %>%
       unique()
     }
   })
 
-    
   pal <- reactive ({
     colorBin(palette = pal_new(),
              bins= breaks(),
