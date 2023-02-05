@@ -19,7 +19,6 @@ rm(list=ls())
 ################################################################################
 #Reading in Shapefiles
 #District UNOCHA
-
 district_shp <-  read_sf("data/shapefile_district/pakistan_indicators.shp") %>% 
   clean_names() %>% 
   filter(year == 2018) %>% 
@@ -30,9 +29,7 @@ district_shp <-  read_sf("data/shapefile_district/pakistan_indicators.shp") %>%
   st_transform(crs='+proj=longlat +datum=WGS84') %>% #4326
   mutate(polygon = "district")
 
-
 #Teshil Shape File
-
 tehsil_shp <- read_sf("data/Tehsils_shp_UNOCHA/pak_admbnda_adm3_ocha_pco_gaul_20181218.shp")%>% 
   clean_names() %>% 
   select(province = adm1_en, district = adm2_en, tehsil = adm3_en, geometry) %>% 
@@ -360,7 +357,6 @@ pak_shp %>% write_rds("CCDR_Dashboard/data/pak_shp.RDS")
 ################################################################################
 ###Metadata for PTI
 metadata_climate <- import_list("data/pak_metadata_climate.xlsx")
-
 # devPTIpack::validate_metadata(metadata_climate)
 
 metadata_climate %>% 
@@ -418,3 +414,10 @@ pti_shps$admin1_District %>% st_crs()
 validate_geometries(pti_shps)
 ################################################################################
 
+#For pca (Using the data for PTI in wide format)
+#Using data in original format 
+metadata_climate <- import_list("data/pak_metadata_climate_pca.xlsx")
+
+data_pca <- metadata_climate$admin1_District_copy
+data_pca %>% 
+  write_rds("CCDR_Dashboard/data/data_pca")

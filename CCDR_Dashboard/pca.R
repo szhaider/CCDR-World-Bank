@@ -17,13 +17,16 @@ output$main_map <- leaflet::renderLeaflet({
 
 
 data_pca_final <- shiny::reactive({
+  
   req(input$features_selected)
   
   data_pca_updated <- data_pca %>% 
-    dplyr::select(district, input$features_selected)
+    dplyr::select(district, 
+                  input$features_selected)
   
   if(any(is.na(data_pca_updated))) {
-    data_pca_updated <- data_pca_updated %>% na.omit()
+    data_pca_updated <- data_pca_updated %>% 
+      na.omit()
   }else{
     data_pca_updated
   }

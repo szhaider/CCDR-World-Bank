@@ -41,7 +41,6 @@ pti_shps <-  readRDS("data/pak_geometries.rds")
 #PTI Metadata
 pti_mtdt <- readRDS("data/pak_metadata_climate.RDS")
 
-
 #Socio-Economic Indicators List
 development_options <- data %>%
   filter(domain == "Development Outcomes") %>%
@@ -103,7 +102,8 @@ data_pca <- readRDS("data/data_pca")
 #Feature choices
 mychoices <- list(
   `Survey Data` = c(names(data_pca[2:34])),
-  `Geospatial Data` = c(names(data_pca[35:56]))
+  `Geospatial Data` = c(names(data_pca[35:56])),
+  `Rrlative Welath Index` = c(names(data_pca[58:59]))
 )
 
 ################################################################################
