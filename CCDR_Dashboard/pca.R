@@ -182,7 +182,6 @@ observe({
                          opacity = 0.9,
                          fill = TRUE,
                          dashArray = c(5,5),
-                         
                          smoothFactor = 0.8,
                          highlightOptions = leaflet::highlightOptions(weight= 2.5,
                                                                       color = "darkgrey",

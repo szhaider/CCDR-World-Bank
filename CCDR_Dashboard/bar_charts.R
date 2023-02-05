@@ -90,14 +90,26 @@ output$bar_chart <- renderPlot({
     bar_chart_data() %>%
       mutate(district = fct_reorder(district , value)) %>%
       ggplot(aes(y=district, x=value)) +
-      geom_col(fill="midnightblue")+
-       labs(y="", x= input$indicator_bar)
+      geom_col(fill="seagreen", width = 0.6, alpha=0.7)+
+       labs(y="", x= input$indicator_bar)+
+       theme(
+         axis.line = element_line(color='black'),
+         plot.background = element_blank(),
+         panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         panel.border = element_blank())
    }else{
      bar_chart_data() %>%
        mutate(tehsil = fct_reorder(tehsil , value)) %>%
        ggplot(aes(y=tehsil, x=value))+
-       geom_col(fill="midnightblue")+
-       labs(y="", x= input$indicator_bar)
+       geom_col(fill="seagreen", width = 0.6, alpha=0.7 )+
+       labs(y="", x= input$indicator_bar)+
+       theme(
+         axis.line = element_line(color='black'),
+         plot.background = element_blank(),
+         panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         panel.border = element_blank())
    }
 })
 

@@ -6,9 +6,6 @@ library(forcats)
 library(tidyr)
 library(ggplot2)
 library(stringr)
-# library(plotly)
-# library(scales)
-# library(forcats)
 library(shinyscreenshot)
 library(glue)
 library(leaflet)
@@ -17,7 +14,6 @@ library(shinythemes)
 library(shinycssloaders)
 library(htmltools)
 library(DT)
-# library(lubridate)
 library(shinydashboard)
 library(shinyWidgets)
 library(leafsync)
@@ -29,14 +25,7 @@ library(gpclib)
 library(waiter)
 library(leaflet.minicharts)
 
-# library(RColorBrewer)
-# library(manipulateWidget)
-# library(broom)
-# library(webshot)
-# install_phantomjs()
 suppressWarnings(gpclibPermit())
-
-# library(ClimatePCA)
 
 theme_set(theme_light())
 ################################################################################
@@ -457,31 +446,31 @@ ui <- function(request){
                             column(6,
                                    offset = 0,
                                    style =
-                                     "padding-top:1px;
-                                       padding-bottom:0px; 
-                                        padding-left:0px;
+                                     'padding-bottom:0px;
+                                       padding-left:0px;
                                        padding-right:0px;
-                                       position: relative;",
+                                       margin-left:0px;
+                                       margin-right:-10px;
+                                       position: relative;',
                                    tags$head(tags$style(
                                      "#source_comp1{color:black; 
                                        margin-left:-10px;  
-                                       font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
-                                   tags$style(type = 'text/css', '#source_comp1 {height: calc(85vh - 50px) !important;}'),
+                                       font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc;  }")),
+                                   tags$style(type = 'text/css', '#source_comp1 {height: calc(20vh - 20px) !important;}'),
                                    verbatimTextOutput("source_comp1")),
                             column(6,
                                    offset = 0,
                                    style = 
-                                     'padding-bottom:0px; 
-                                    padding-top:1px;
-                                     padding-left:2px; 
-                                     padding-right:2px; 
-                                     
-                                     margin-left:0px;
-                                     position: relative;',
+                                     'padding-bottom:0px;
+                                       padding-left:2px;
+                                       padding-right:2px;
+                                       margin-left:0px;
+                                       margin-right:5px;
+                                       position: relative;',
                                    tags$head(tags$style(
                                      "#source_comp2{color:black; 
                                        font-size:12px; font-style:italic; max-height: 110px; background: #ffe6cc; }")),
-                                   tags$style(type = 'text/css', '#source_comp2 {height: calc(85vh - 50px) !important;}'),   
+                                   tags$style(type = 'text/css', '#source_comp2 {height: calc(20vh - 20px) !important;}'),   
                                    verbatimTextOutput("source_comp2")
                                    
                             ))
