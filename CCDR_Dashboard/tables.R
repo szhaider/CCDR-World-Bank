@@ -49,9 +49,9 @@ observeEvent(input$table_domain, {
         "table_indicator",
         choices = choices_ind_tab1
       )
-  }else{
+  }else if(input$table_domain == "Relative Wealth Index"){
     choices_ind_tab2 = data %>% 
-      filter(domain == "Natural Hazards") %>% 
+      filter(domain == "Relative Wealth Index") %>% 
       distinct(indicator_1) %>% 
       pull(indicator_1)
     
@@ -59,6 +59,17 @@ observeEvent(input$table_domain, {
       getDefaultReactiveDomain(),
       "table_indicator",
       choices = choices_ind_tab2
+    )
+  }else{
+    choices_ind_tab3 = data %>% 
+      filter(domain == "Natural Hazards") %>% 
+      distinct(indicator_1) %>% 
+      pull(indicator_1)
+    
+    updateSelectInput(
+      getDefaultReactiveDomain(),
+      "table_indicator",
+      choices = choices_ind_tab3
       )
   }
 })
@@ -75,16 +86,11 @@ observeEvent(input$table_polygon,{
                            `Air pollution`= list("Expected increase of mortality from air pollution (population count)", "Expected increase of mortality from air pollution (% of ADM population)"),
                            `Demography` = list("District Population"),
                            `Agriculture & Built-up Area` = list("Built-up area extent (Ha)", "Agricultural land extent (Ha)")))  
-    # data %>% 
-    # filter(domain == "Natural Hazards") %>% 
-    # distinct(indicator_1) %>% 
-    # slice_head(n=-3) %>% 
-    # pull(indicator_1)
+    
     updateSelectInput(
       getDefaultReactiveDomain(),
       "table_indicator",
-      choices = choices_haz_tab1
-    )
+      choices = choices_haz_tab1)
   }else if(input$table_polygon == "Tehsil" & input$table_domain == "Natural Hazards") {
     choices_haz_tab2 = (list(`River flooding` = list("Expected mortality from river floods (population count)", "Expected mortality from river floods (% of ADM population)", "Expected damage to built-up assets from river floods (hectares)", "Expected damage to built-up assets from river floods (% of ADM built-up area)", "Expected exposure of agricultural land to river floods (hectares)", "Expected exposure of agricultural land to river floods (% of ADM agricultural land)"),
                              `Coastal flooding` = list("Expected mortality from coastal floods (population count)", "Expected damage to built-up assets from coastal floods (hectares)", "Expected damage to built-up assets from coastal floods (% of ADM built-up area)"),   #"Expected mortality from coastal floods (% of ADM population)",
@@ -94,25 +100,32 @@ observeEvent(input$table_polygon,{
                              `Air pollution`= list("Expected increase of mortality from air pollution (population count)", "Expected increase of mortality from air pollution (% of ADM population)"),
                              `Demography` = list("Tehsil Population"),
                              `Agriculture & Built-up Area` = list("Tehsil Built-up area extent (Ha)", "Tehsil Agricultural land extent (Ha)"))) 
-      # data %>% 
-      # filter(domain == "Natural Hazards") %>% 
-      # distinct(indicator_1) %>% 
-      # slice_tail(n=-3) %>% 
-      # pull(indicator_1)
-    updateSelectInput(
+
+        updateSelectInput(
       getDefaultReactiveDomain(),
       "table_indicator",
       choices = choices_haz_tab2
       )
+  }else if((input$table_polygon == "Tehsil" || input$table_polygon == "District")  & input$table_domain == "Relative Wealth Index") {
+    choices_haz_tab3 = data %>% 
+      filter(domain == "Relative Wealth Index") %>% 
+      distinct(indicator_1) %>% 
+      pull(indicator_1)
+    
+    updateSelectInput(
+      getDefaultReactiveDomain(),
+      "table_indicator",
+      choices = choices_haz_tab3
+    )
   }else{
-    choices_dev_tab2 = data %>% 
+    choices_dev_tab4 = data %>% 
       filter(domain == "Development Outcomes") %>% 
       distinct(indicator_1) %>% 
       pull(indicator_1)
     updateSelectInput(
       getDefaultReactiveDomain(),
       "table_indicator",
-      choices = choices_dev_tab2
+      choices = choices_dev_tab4
     )
   }
 })
@@ -138,9 +151,6 @@ tables_climate <- reactive({
       janitor::clean_names(case = "title") 
   }
 })
-
-
-
 
 output$tables_main <- renderDataTable({
   DT::datatable( 

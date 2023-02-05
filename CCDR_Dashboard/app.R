@@ -55,6 +55,12 @@ hazards_options <- data %>%
   distinct(indicator_1) %>% 
   pull(indicator_1)
 
+#RWI options list
+rwi_options <- data %>% 
+  filter(domain == "Relative Wealth Index") %>% 
+  distinct(indicator_1) %>% 
+  pull(indicator_1)
+
 #Domain 
 domain_options <- data %>% 
   distinct(domain) %>% 
@@ -87,7 +93,8 @@ indicator_listed = (list(`River flooding` = list("Expected mortality from river 
                          `Agriculture & Built-up Area` = list("Built-up area extent (Ha)",
                                                               "Agricultural land extent (Ha)", 
                                                               "Tehsil Built-up area extent (Ha)",
-                                                              "Tehsil Agricultural land extent (Ha)")))
+                                                              "Tehsil Agricultural land extent (Ha)"),
+                    `Relative Wealth Index` = list('Mean Relative Wealth Index', 'Majority Relative Wealth Index')))
 
 
 legend <- readRDS("data/legend")
@@ -184,7 +191,8 @@ ui <- function(request){
                                                                      # hazards_options,
                                                                      selectize = F),  
                                                          conditionalPanel(
-                                                           condition = "input.domain_map == 'Natural Hazards'",
+                                                           condition = "input.domain_map == 'Natural Hazards' ||
+                                                                        input.domain_map == 'Relative Wealth Index'",
                                                            selectInput("polygon_map",
                                                                        "Choose Spatial Level",
                                                                        choices = spatial_level,
@@ -195,7 +203,7 @@ ui <- function(request){
                                                          # br(),
                                                          conditionalPanel(
                                                            condition = 
-                                                             "input.indicator_map !== 'Expected mortality from coastal floods (population count)'&&
+                                            "input.indicator_map !== 'Expected mortality from coastal floods (population count)'&&
                                              input.indicator_map !== 'Expected mortality from coastal floods (% of ADM population)'&&
                                              input.indicator_map !== 'Expected damage to built-up assets from coastal floods (hectares)' &&
                                              input.indicator_map !== 'Expected damage to built-up assets from coastal floods (% of ADM built-up area)'&&
@@ -363,7 +371,8 @@ ui <- function(request){
                                       choices = hazards_options,
                                       selectize = F),
                           conditionalPanel(
-                            condition = "input.domain_map1 == 'Natural Hazards'",
+                            condition = "input.domain_map1 == 'Natural Hazards' ||
+                                         input.domain_map1 == 'Relative Wealth Index'",
                             selectInput("polygon_map1",
                                         "Choose Spatial Level for MAP1",
                                         choices = spatial_level,
@@ -383,7 +392,8 @@ ui <- function(request){
                                       choices = hazards_options,
                                       selectize = F),
                           conditionalPanel(
-                            condition = "input.domain_map2 == 'Natural Hazards'",
+                            condition = "input.domain_map2 == 'Natural Hazards' ||
+                                         input.domain_map2 == 'Relative Wealth Index'",
                             selectInput("polygon_map2",
                                         "Choose Spatial Level for MAP2",
                                         choices = spatial_level,
@@ -515,7 +525,8 @@ ui <- function(request){
                                      ),
                                      
                                      conditionalPanel(
-                                       condition = "input.domain_bar == 'Natural Hazards'",  
+                                       condition = "input.domain_bar == 'Natural Hazards' ||
+                                                    input.domain_bar == 'Relative Wealth Index'",  
                                        selectInput("polygon_bar",
                                                    "Choose Spatial Level",
                                                    choices = unique(data$polygon),
@@ -578,7 +589,8 @@ ui <- function(request){
                                       choices = unique(data$indicator_1),
                                       selectize = F),
                           conditionalPanel(
-                            condition = "input.table_domain == 'Natural Hazards'",
+                            condition = "input.table_domain == 'Natural Hazards' ||
+                                         input.table_domain == 'Relative Wealth Index'",
                             selectInput("table_polygon",
                                         "Choose Spatial Level",
                                         choices = unique(data$polygon),

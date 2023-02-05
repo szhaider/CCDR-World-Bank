@@ -63,6 +63,14 @@ if(input$domain_bar == "Natural Hazards" & input$polygon_bar == "District"){
     "indicator_bar",
     choices = bar_choices_haz2
   )
+}else if(input$domain_bar == "Relative Wealth Index" & (input$polygon_bar == "Tehsil" || input$polygon_bar == "District")){
+  bar_choices_haz2 = (list(`Relative Wealth Index` = list("Mean Relative Wealth Index", 
+                                                   "Majority Relative Wealth Index")))
+  updateSelectInput(
+    getDefaultReactiveDomain(),
+    "indicator_bar",
+    choices = bar_choices_haz2
+  )
 }else{ 
   updateSelectInput(
     getDefaultReactiveDomain(),

@@ -46,6 +46,17 @@ observeEvent(input$domain_map1,{
       "indicator_map1",    
       choices = choices_dev_c1
     )
+  }else if(input$domain_map1 == "Relative Wealth Index"){
+    choices_dev_c1 =  data %>% 
+      filter(domain == "Relative Wealth Index") %>% 
+      distinct(indicator_1) %>% 
+      pull(indicator_1)
+    
+    updateSelectInput(
+      getDefaultReactiveDomain(),
+      "indicator_map1",    
+      choices = choices_dev_c1
+    )
   }else {
     updateSelectInput(
       getDefaultReactiveDomain(),
@@ -137,6 +148,12 @@ labels_map1 <- reactive({
       lapply(htmltools::HTML) 
   }else if(input$polygon_map1 == "District" & input$domain_map1 == "Natural Hazards"){
     paste0(glue::glue("<b>District</b>: { pak_shp_comp()$district } </br>"), glue::glue("<b> { map_data1()$indicator_1 }: </b>"), "\n", glue::glue("{ round(map_data1()$value, 3) }"), " ", glue::glue("{ map_data1()$unit }"), sep = "") %>% 
+      lapply(htmltools::HTML) 
+  }else if(input$polygon_map1 == "District" & input$domain_map1 == "Relative Wealth Index"){
+    paste0(glue::glue("<b>District</b>: { pak_shp_comp()$district } </br>"), glue::glue("<b> { map_data1()$indicator_1 }: </b>"), "\n", glue::glue("{ round(map_data1()$value, 2) }"), " ", glue::glue("{ map_data1()$unit }"), sep = "") %>% 
+      lapply(htmltools::HTML) 
+  }else if(input$polygon_map1 == "Tehsil" & input$domain_map1 == "Relative Wealth Index"){
+    paste0(glue::glue("<b>Tehsil</b>: { pak_shp_comp()$tehsil } </br>"), glue::glue("<b> { map_data1()$indicator_1 }: </b>"), "\n", glue::glue("{ round(map_data1()$value, 2) }"), " ", glue::glue("{ map_data1()$unit }"), sep = "") %>% 
       lapply(htmltools::HTML) 
   }
 })

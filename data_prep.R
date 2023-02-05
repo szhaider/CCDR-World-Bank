@@ -92,6 +92,29 @@ hazards_tehsil <- hazards_tehsil %>%
 hazards <- bind_rows(hazards_district, hazards_tehsil) %>% 
   mutate(domain = "Natural Hazards")
 
+
+##Bringin in Relative Wealth Indices at district and tehsil level from the latest flooding data (by Mattia)
+#added on 02/05/2023
+
+rwi_data <- import_list("data/rwi_data_flooding.xlsx")
+
+#district rwi 
+rwi_district <- rwi_data$district_rwi %>% 
+  pivot_longer(RWI_rwi_mean:RWI_rwi_majority, names_to = "indicator", values_to = "value") %>% 
+  mutate(polygon = "District", domain = "Relative Wealth Index") %>% 
+  arrange(district)
+  
+#Tehsil rwi
+rwi_tehsil <- rwi_data$tehsil_rwi %>% 
+  pivot_longer(RWI_rwi_mean:RWI_rwi_majority, names_to = "indicator", values_to = "value")%>% 
+  mutate(polygon = "Tehsil", domain = "Relative Wealth Index") %>% 
+  arrange(tehsil)
+
+#rwi_combined
+rwi_final <- 
+  bind_rows(rwi_district, rwi_tehsil)
+
+
 # %>% 
 #   mutate(tehsil =
 #            case_when(
@@ -272,16 +295,18 @@ development_indicators <- development_indicators %>%
 #Combining all data
 data <- hazards %>% 
   bind_rows(development_indicators) %>% 
+  bind_rows(rwi_final) %>% 
   mutate(value = 
            case_when(
           domain == "Development Outcomes" ~ round(value, 2),
-          domain == "Natural Hazards" ~ round(value, 2)
+          domain == "Natural Hazards" ~ round(value, 2),
+          domain == "Relative Wealth Index" ~ round(value, 2)
           )
   )
 
 #For color mapping on Maps (to reverse for selected indicators)
-# data %>% 
-#   distinct(indicator) %>% 
+# data %>%
+#   distinct(indicator) %>%
 #   rio::export("legend.xlsx")
 
 #Reading in Color mapping file for data Join
