@@ -8,7 +8,6 @@ pak_shp_comp2 <-  reactive({
 })
 
 map_data2 <- reactive({
-  # req(input$domain_map2 == "Natural Hazards" || input$domain_map2 =="Development Outcomes")
   data %>%
     filter(polygon   %in%  input$polygon_map2,
            domain    %in%  input$domain_map2,
@@ -110,7 +109,6 @@ output$double_map_2 <- renderLeaflet({
   leaflet(options = leafletOptions(zoomSnap = 0.20, 
                                    zoomDelta = 0.20)) %>% 
     addProviderTiles(providers$CartoDB, group = "CARTO") %>% 
-    # addProviderTiles(providers$Esri , group = "ESRI") %>%
     setView(lng=70, lat = 30, zoom = 5) %>% 
     syncWith("combined_map")
   
@@ -119,7 +117,6 @@ output$double_map_2 <- renderLeaflet({
 
 outputOptions(output, "double_map_2", suspendWhenHidden = FALSE)
 
-# observeEvent(input$my_tab == "my_tab1",{
 #Labelling for  Map2
 
   
@@ -156,19 +153,6 @@ outputOptions(output, "double_map_2", suspendWhenHidden = FALSE)
   breaks_map2 <- reactive({
     req(unique(map_data2()$context) %in% c("negative", "positive"))
     if(
-    #   unique(map_data2()$indicator_1) == "Expected mortality from coastal floods (population count)"||
-    #   unique(map_data2()$indicator_1) == "Expected mortality from coastal floods (% of ADM population)" ||
-    #   unique(map_data2()$indicator_1) == "Expected damage to built-up assets from coastal floods (hectares)" ||
-    #   unique(map_data2()$indicator_1) == "Expected damage to built-up assets from coastal floods (% of ADM built-up area)" ||
-    #   unique(map_data2()$indicator_1) == "Expected exposure to heat stress (% of ADM population)"||
-    #   # unique(map_data2()$indicator_1) == "Expected mortality from river floods (% of ADM population)" ||
-    #   unique(map_data2()$indicator_1) == "Expected increase of mortality from air pollution (% of ADM population)"){
-    #   
-    #   seq(min(map_data2()$value), max(map_data2()$value), (max(map_data2()$value)/3))
-    # } else {
-    #   quantile(map_data2()$value, seq(0, 1, 1 / (5)), na.rm = TRUE) %>%
-    #     unique()
-    # }
       unique(map_data2()$indicator_1) == "Expected mortality from coastal floods (population count)"||
       unique(map_data2()$indicator_1) == "Expected mortality from coastal floods (% of ADM population)" ||
       unique(map_data2()$indicator_1) == "Expected increase of mortality from air pollution (% of ADM population)"
@@ -223,8 +207,6 @@ outputOptions(output, "double_map_2", suspendWhenHidden = FALSE)
   
   
   observe({ 
-  # req(input$my_tab == "my_tab1")  
-    
   leafletProxy("double_map_2", data= pak_shp_comp2()) %>%
     clearShapes() %>% 
     addPolygons(label= labels_map2(),
@@ -274,9 +256,7 @@ outputOptions(output, "double_map_2", suspendWhenHidden = FALSE)
   output$source_comp2 <- renderText({
     paste0(" MAP 2", 
            "\n",
-           " Source: ", glue("{ unique(map_data2()$source) }",),
+           " Source: ", glue("{ unique(map_data2()$source) }"),
            "\n",
            " Definition: ", glue("{ unique(map_data2()$definition) }"))
-    # ,"\n",
-    # "Definition: ",unique(d_c2()$definition)
   })

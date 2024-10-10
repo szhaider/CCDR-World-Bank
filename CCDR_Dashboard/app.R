@@ -19,13 +19,13 @@ library(shinyWidgets)
 library(leafsync)
 library(highcharter)
 # remotes::install_github("Ebukin/devPTIpack")
+# remotes::install_github("https://github.com/szhaider/devPTIpack", force = T)
+
 library(devPTIpack)
-library(maptools)
-library(gpclib)
+
 library(waiter)
 library(leaflet.minicharts)
-
-suppressWarnings(gpclibPermit())
+library(recipes)
 
 theme_set(theme_light())
 ################################################################################
@@ -51,14 +51,14 @@ development_options <- data %>%
 hazards_options <- data %>% 
   filter(domain == "Natural Hazards") %>% 
   # arrange(indicator_1) %>% 
-  distinct(indicator_1) %>% 
-  pull(indicator_1)
+  distinct(indicator) %>% 
+  pull(indicator)
 
 #RWI options list
 rwi_options <- data %>% 
   filter(domain == "Relative Wealth Index") %>% 
-  distinct(indicator_1) %>% 
-  pull(indicator_1)
+  distinct(indicator) %>% 
+  pull(indicator)
 
 #Domain 
 domain_options <- data %>% 
@@ -96,7 +96,7 @@ indicator_listed = (list(`River flooding` = list("Expected mortality from river 
                     `Relative Wealth Index` = list('Mean Relative Wealth Index', 'Majority Relative Wealth Index')))
 
 
-legend <- readRDS("data/legend")
+legend <- readRDS("data/legend.rda")
 districts <- readRDS("data/districts")
 data_pca <- readRDS("data/data_pca")
 #Feature choices
@@ -111,62 +111,28 @@ mychoices <- list(
 #User Interface
 ################################################################################
 ui <- function(request){
-  
-  # tagList(
-  #   waiter_show_on_load(html = spin_loaders(10)),
-  #   # br(),
-  # )
-  # tags$style(".recalculating { opacity: inherit !important; }")
-  navbarPage("CLIMATE Dashboard",
-             # theme = shinytheme("journal"),
-             ####################
-             #to suppress error on screen
-             # tags$style(type="text/css",
-             #            ".shiny-output-error { visibility: hidden; }",
-             #            ".shiny-output-error:before { visibility: hidden; }"
-             # ),
-             ####################
-             
-             # header= tagList(
-             #   useShinydashboard()
-             # ),
+    navbarPage("CLIMATE Dashboard",
              header=tags$style(HTML("
                                         .container-fluid{
                                           padding: 3px !important;
                                         }
-                                        
-                                      
                                         .navbar{
                                          margin-bottom: 0px !important;
                                          margin-left: 1px !important;
                                          margin-right: 1px !important;
                                         }")),  
-             
              tags$head(tags$script(type="text/javascript", src = "wb_img.js")),
-             
              tabPanel("INTERACTIVE MAPS",
                       tabsetPanel(id = "main_page",
                                   type = c("hidden"),
-                                  # selected ="PTI1" ,
-                                  
-                                  tabPanel("main_page1", 
+                                           tabPanel("main_page1", 
                                            id="main_page1", 
-                                           # bootstrapPage(theme = shinytheme("flatly")),
-                                           
-                                           # use_waiter(),
                                            waiter_show_on_load(html = spin_loaders(10)),
-                                           
-                                           # tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
-                                           
                                            tags$style(type = 'text/css', '#maps {height: calc(97vh - 100px) !important;}', style= 'padding:0px;'),
                                            leafletOutput("maps"),
-                                           # withSpinner(),
-                                           
                                            br(),
                                            tags$head(tags$style("#source_map{color:black; font-size:12px; font-style:italic; max-height: 110px; 'padding:0px;'; margin-top:-18px; background: #ffe6cc; }")),
-                                           
                                            verbatimTextOutput("source_map"),
-                                           
                                            absolutePanel(id = "controls", class = "panel panel-default", fixed= TRUE,
                                                          draggable = TRUE, bottom = "auto", right = "auto", left = 70, top = 80,
                                                          width = 280, height = "auto",
@@ -199,8 +165,6 @@ ui <- function(request){
                                                                        selected = spatial_level[1],
                                                                        selectize = F)
                                                          ),
-                                                         
-                                                         # br(),
                                                          conditionalPanel(
                                                            condition = 
                                             "input.indicator_map !== 'Expected mortality from coastal floods (population count)'&&
@@ -216,7 +180,6 @@ ui <- function(request){
                                              input.indicator_map !== 'Expected mortality from river floods (% of ADM population)'&&
                                              input.indicator_map !== 'Expected mortality from river floods (population count)'&&
                                              input.indicator_map !== 'Expected damage to built-up assets from river floods (% of ADM built-up area)'",      
-                                                           
                                                            numericInput("bins",
                                                                         "Choose Number of Bins",
                                                                         value = 5,
@@ -224,8 +187,6 @@ ui <- function(request){
                                                                         max = 10,
                                                                         step = 1)
                                                          ),
-                                                         # radioButtons("pallettes_fed", ("Change Color Scheme"), inline = TRUE, choices = list("Values"  = "pallette_fed1",
-                                                         # h6(tags$b(tags$em("Use this button to download the data underlying the current on-screen map"))),
                                                          downloadButton("mapdata", "Data", class= "btn-sm"),
                                                          actionButton("screenshot", "Image",class="btn-sm", icon=icon("camera")),
                                                          actionButton("help_map", "Help", icon= icon('question-circle'), class ="btn-sm"),
@@ -236,11 +197,8 @@ ui <- function(request){
              tabPanel("PTI",
                       tabsetPanel(id = "pti_help",
                                   type = c("hidden"),
-                                  # selected ="PTI1" ,
-                                  
                                   tabPanel("PTI1", 
                                            id="PTI1", 
-                                           
                                            devPTIpack::mod_ptipage_twocol_ui(
                                              id = "pti_mod", 
                                              map_height = "calc(90vh)", 
@@ -249,22 +207,14 @@ ui <- function(request){
                                              show_waiter = FALSE,
                                              wt_dwnld_options = c("data", "weights"),
                                              map_dwnld_options = c()),
-                                           
                                            h6(actionLink("pti_link_1",
                                                          "What is the Project Targeting Index (PTI)?")),
                                            h6(actionLink("pti_link_2",
                                                          "How is the PTI constructed, and how should the score be interpreted?"))
-                                           # mainPanel(
-                                           #   verbatimTextOutput("text"),
-                                           # )      
-                                           
+                                              )
                                   )
-                                  
-                      )
              ),
-             # tabPanel("PCA",
-             #            ClimatePCA::run_app()
-             #            ),
+            
              tabPanel("PCA",
                       sidebarLayout(
                         sidebarPanel(
@@ -273,39 +223,23 @@ ui <- function(request){
                           tags$strong(tags$em(tags$h6("Select the features to compute the Geographic Targeting Index based on Principal Component Analysis (PC1)"))),
                           shinyWidgets::pickerInput("features_selected",
                                                     "Select featues for PCA",
-                                                    choices =  mychoices,
-                                                    selected = mychoices[1],
-                                                    options = list(
-                                                      `actions-box` = TRUE),
+                                                    choices  =  mychoices,
+                                                    # selected = unlist(mychoices)[1],
+                                                    options  = list(
+                                                    `actions-box` = TRUE),
                                                     multiple=TRUE),
                           
                           br(),
-                          # br(),
-                          # Variance graph of the PCs selected
-                          
-                          shiny::plotOutput("var_explained_pcs",
+                      shiny::plotOutput("var_explained_pcs",
                                             height = "150px",
                                             width = '100%'),
                           br(),
-                          # absolutePanel(id="pca_bins_panel", 
-                          #               top=100, 
-                          #               left ="auto" , 
-                          #               bottom ="auto" , 
-                          #               right =100 , 
-                          #               draggable = T,
-                          #               
                           numericInput("bins_pca",
                                        "Choose Number of Bins",
                                        value = 5,
                                        min=3, 
                                        max = 10, 
                                        step = 1),
-                          
-                          # ),
-                          # shiny::fluidRow(shiny::actionButton("pca_help",
-                          #                                     "HELP",
-                          #                                     icon= icon("help"),
-                          #                                     class = "btn-sm")),
                           br(),
                           shiny::fluidRow(shiny::downloadLink("pca_download",
                                                               "Download PCA (xlsx)",
@@ -317,39 +251,22 @@ ui <- function(request){
                           h6(actionLink("pca_link_2",
                                         "How is the PCA constructed, and how should the score be interpreted?"))
                         ),
-                        
-                        
-                        shiny::mainPanel(
+                       shiny::mainPanel(
                           width = 9,
                           tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
                           tags$style(type = "text/css", "#main_map {height: calc(100vh - 80px) !important;}"),
-                          
-                          
-                          
                           leaflet::leafletOutput("main_map",
                                                  height = '100vh',
-                                                 width = "75.5vw"
-                          ),
-                          
+                                                 width = "75.5vw"),
                           tags$style(' #main_map {
                         position: relative;
                         margin-left: -26px;
                         padding: 0px;
                         }')
-                          
-                        )
+                          )
                       )),
              tabPanel("COMPARISON MAPS",
-                      # h3("COMPARISON MAPS"),
-                      # mainPanel(width = 9,
-                      # tabsetPanel(
-                      #   # "COMPARISON MAPS",
-                      #             id="my_tab",
-                      #              type = c("hidden"),
-                      #             tabPanel("my_tab1",
-                      
-                      
-                      sidebarLayout(
+                   sidebarLayout(
                         sidebarPanel(
                           width = 3,
                           style = "background-color: white;
@@ -379,14 +296,12 @@ ui <- function(request){
                                         selected = spatial_level[1],
                                         selectize = F)
                           ),
-                          
                           hr(),
                           selectInput("domain_map2",
                                       "Choose Domain for MAP2",
                                       choices = domain_options,
                                       selected = domain_options[1],
                                       selectize = F),  
-                          
                           selectInput("indicator_map2",
                                       "Choose Indicator for MAP2",
                                       choices = hazards_options,
@@ -400,11 +315,8 @@ ui <- function(request){
                                         selected = spatial_level[1],
                                         selectize = F)
                           ),
-                          
-                          # actionButton("screenshot_comp", "Image",class="btn-sm", icon = icon("camera")),
                           actionButton("help_comp", "Help", icon= icon('question-circle'), class ="btn-sm"),
                         ),
-                        
                         mainPanel(
                           width = 9,
                           fluidRow(
@@ -418,22 +330,6 @@ ui <- function(request){
                                        position: relative;',
                                    tags$style(type = 'text/css', '#double_map_1 {height: calc(85vh - 50px) !important;}'),
                                    leafletOutput("double_map_1", width = "100%", height = "400px"),
-                                   # absolutePanel(id = "controls_1", class = "panel panel-default", fixed= TRUE,
-                                   #               draggable = FALSE, bottom = "auto", right = "auto", left = 330, top = 90,
-                                   #               width = 150, height = "auto",
-                                   #               style = "background-color: white;
-                                   #             opacity: 0.75;
-                                   #             padding: 5px 5px 5px 5px;
-                                   #             margin: auto;
-                                   #             border-radius: 1pt;
-                                   #             box-shadow: 0pt 0pt 0pt 0px rgba(61,59,61,0.48);
-                                   #             padding-bottom: 0mm;
-                                   #             padding-top: 0mm;",
-                                   # numericInput("bins_map1", "Select number of bins",value= 5, min = 3, max = 10, step=1)
-                                   # )
-                                   
-                                   # %>%
-                                   # withSpinner()
                             ),
                             column(width = 6,
                                    offset = 0,
@@ -445,13 +341,8 @@ ui <- function(request){
                                        margin-right:5px;
                                        position: relative;',
                                    tags$style(type = 'text/css', '#double_map_2 {height: calc(85vh - 50px) !important;}'),
-                                   # tags$style(type="text/css", "#double_map_2.recalculating { opacity: 1.0; }"),
                                    leafletOutput("double_map_2", width = "100%", height = "400px")
-                                   # %>%
-                                   #   withSpinner() 
                             )),
-                          # br(),
-                          # br(),
                           fluidRow(
                             column(6,
                                    offset = 0,
@@ -486,13 +377,8 @@ ui <- function(request){
                             ))
                         )
                       )
-                      # )
-                      # selected = "my_tab1")
-                      # )
-             ),
-             
+                ),
              tabPanel("GRAPHS",
-                      
                       sidebarLayout(
                         sidebarPanel(width= 3,
                                      style = "background-color: white;
@@ -503,15 +389,12 @@ ui <- function(request){
                                box-shadow: 0pt 0pt 6pt 0px rgba(61,59,61,0.48);
                                padding-bottom: 2mm;
                                padding-top: 1mm;",
-                                     
-                                     
                                      selectInput(
                                        "province_bar",
                                        "Choose Province",
                                        choices = unique(data$province)[-5],
                                        selectize = F
                                      ),
-                                     
                                      selectInput(
                                        "domain_bar",
                                        "Choose Domain",
@@ -523,7 +406,6 @@ ui <- function(request){
                                        choices = unique(data$indicator_1),
                                        selectize = F
                                      ),
-                                     
                                      conditionalPanel(
                                        condition = "input.domain_bar == 'Natural Hazards' ||
                                                     input.domain_bar == 'Relative Wealth Index'",  
@@ -533,8 +415,6 @@ ui <- function(request){
                                                    selected = "District",
                                                    selectize = F)
                                      ),
-                                     
-                                     
                                      actionButton("help_bar", "Help", icon= icon('question-circle'), class ="btn-sm"),
                                      
                         ),
@@ -544,14 +424,7 @@ ui <- function(request){
                             width = '900px',
                             height = '900px'
                           ),
-                          
-                          # highchartOutput('bar_chart',
-                          #                 width = '950px',
-                          #                 height = '680px'),
-                          
                           fluidRow(
-                            # column(width = 4,
-                            #        h5(tags$strong("Units: "))),
                             column(width = 8,
                                    (uiOutput("labels_bar"))
                             )
@@ -560,7 +433,6 @@ ui <- function(request){
                         )
                         
                       )
-                      
              ),
              tabPanel("TABLES",
                       sidebarLayout(
@@ -596,8 +468,6 @@ ui <- function(request){
                                         choices = unique(data$polygon),
                                         selectize = F)
                           ),
-                          
-                          
                           verbatimTextOutput("source_table"),
                           tags$head(tags$style("#source_table{color:black; font-size:12px; font-style:italic; 
                overflow-y:scroll; max-height: 120px; background: #ffe6cc;}")),
@@ -607,19 +477,16 @@ ui <- function(request){
                                          type= "default", 
                                          class="btn-sm"),
                           actionButton("help_tables", "Help", icon= icon('question-circle'), class ="btn-sm")
-                          
                         ),
                         mainPanel(
                           width=9,
                           dataTableOutput("tables_main")
                         )
                       )
-                      
              ),
              tabPanel("ABOUT",
                       tabsetPanel(
                         tabPanel("ABOUT",
-                                 
                                  mainPanel(
                                    width = 12,
                                    style="border:1px solid DodgerBlue;",
@@ -666,25 +533,19 @@ should be targeted.")),
                                           tags$p("Vincent Mariathanasan, Research Analyst -",  tags$b(tags$a(href="mailto:vmariathanasan@worldbank.org", "vmariathanasan@worldbank.org"))),
                                           tags$p("Maham Khan, Research Analyst            -",  tags$b(tags$a(href="mailto:mkhan57@worldbank.org", "mkhan57@worldbank.org"))),
                                           tags$p("Zeeshan Haider, Research Analyst        -",  tags$b(tags$a(href="mailto:shaider7@worldbank.org", "shaider7@worldbank.org"))),
-                                          
-                                          
                                    )
                                  )
                         ),
                         tabPanel("DOCUMENTATAION",
-                                 
                                  mainPanel(
-                                   
                                    br(),
                                    tags$hr(),
                                    h5("Get datasets used in the climate dashboard"),
                                    tags$br(),
                                    fluidRow(
-                                     
                                      downloadButton("download_nat",
                                                     "Natural Hazards",
                                                     class = "btn-success"),
-                                     
                                      downloadButton("download_dev",
                                                     "Development Outcomes",
                                                     class = "btn-success"),
@@ -692,15 +553,11 @@ should be targeted.")),
                                                     "Data Glossary",
                                                     class = "btn-success")
                                    ),
-                                   
-                                   
                                    hr(),
                                    tags$hr(),
                                    h4(strong("Github Repository")),
                                    br(),
                                    tags$a(href= "https://github.com/szhaider/CCDR-World-Bank.git", "Repo Link", target="_blank"), br(),
-                                   
-                                   
                                  )),
                         tabPanel("FEEDBACK",
                                  mainPanel(
@@ -726,17 +583,9 @@ should be targeted.")),
 server <- function(input, output, session) {
   ################################################################################
   #Main Landing page  
-  
-  # source(file.path("main_landing_page.R"), local = TRUE)  
-  # w <- Waiter$new()
-  
-  # observeEvent(input$main_page, {
-  #   
   waiter_show()
   Sys.sleep(3)
   waiter_hide()
-  
-  # })
   
   ################################################################################
   #Main Maps

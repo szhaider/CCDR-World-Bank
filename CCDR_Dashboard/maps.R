@@ -142,7 +142,6 @@ output$maps <- renderLeaflet({
   leaflet(options = leafletOptions(zoomSnap = 0.20, zoomDelta = 0.20)) %>%
     addProviderTiles(providers$Esri, group = "ESRI") %>%
     addProviderTiles(providers$CartoDB, group = "CARTO") %>%
-    # addProviderTiles(providers$st , group = "Stadia") %>% 
     setView(lng=69.5, lat = 30, zoom = 5.2)
 })
 
@@ -250,8 +249,6 @@ labels_map <- reactive({
     
   leafletProxy("maps", data=pak_shp1()) %>% 
     clearShapes() %>% 
-    # clearControls() %>% 
-    # removeControl("legend") %>% 
     addPolygons(label= labels_map(),
                 labelOptions = labelOptions(
                   style = list("font-weight"= "normal",   
@@ -301,7 +298,6 @@ labels_map <- reactive({
                 digits = 2,
                 transform = function(x)  {
                   x
-                  # paste0(min(x),":", max(x))
                   }
               )
               )

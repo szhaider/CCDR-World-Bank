@@ -128,7 +128,6 @@ output$double_map_1 <- renderLeaflet({
   
    leaflet(options = leafletOptions(zoomSnap = 0.20, zoomDelta = 0.20)) %>% 
     addProviderTiles(providers$CartoDB, group = "CARTO") %>% 
-    # addProviderTiles(providers$Esri , group = "ESRI") %>%
     setView(lng=70, lat = 30, zoom = 5)  %>% 
      syncWith("combined_map")
 
@@ -228,11 +227,6 @@ labels_map1 <- reactive({
   })
  
   observe({
-    
-    # comp_map1 <- reactive({
-    # req(input$domain_map1 == "Natural Hazards" || input$domain_map1 == "Development Outcomes")
-    # req(input$my_tab == "my_tab1")
-    
     leafletProxy("double_map_1", data= pak_shp_comp()) %>% 
     clearShapes() %>%
     addPolygons(label= labels_map1(),
@@ -278,9 +272,6 @@ labels_map1 <- reactive({
     )
 })
 
-
-# combineWidgets(map_l1, map_l2)
-
 # #Source Map1  
 output$source_comp1 <- renderText({
   paste0(" MAP 1", 
@@ -288,10 +279,7 @@ output$source_comp1 <- renderText({
          " Source: ", glue("{ unique(map_data1()$source) }"),
          "\n",
          " Definition:",  glue("{ unique(map_data1()$definition) }"))
-         # , "\n",
-         # unique(d_c1()$indicator)
 })
-
 
 # 
 # #Screen shot

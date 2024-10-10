@@ -1,15 +1,19 @@
 
+
 pti_shps1 <- reactive({
-  pti_shps[["admin1_District"]]
+  pti_shps[["admin1_District"]] %>% 
+    sf::st_transform(crs=4326)
 })
+
 
 #Lealfet static options
 output$main_map <- leaflet::renderLeaflet({
-  # message("rendering local map")
   leaflet::leaflet(options = leaflet::leafletOptions(zoomSnap = 0.20, zoomDelta = 0.20)) %>%
     leaflet::addProviderTiles(provider =  "CartoDB.Voyager", group = "CARTO") %>%
     leaflet::setView(lng=69.5, lat = 30, zoom = 5)
 })
+
+# outputOptions(output, "main_map", suspendWhenHidden = FALSE, priority = 1000)
 
 #Script for running Principal Component Analysis and prepping district level standing in PC planes
 
@@ -18,7 +22,7 @@ output$main_map <- leaflet::renderLeaflet({
 
 data_pca_final <- shiny::reactive({
   
-  req(input$features_selected)
+  shiny::req(input$features_selected)
   
   data_pca_updated <- data_pca %>% 
     dplyr::select(district, 
@@ -81,7 +85,7 @@ districts_for_nas <- shiny::reactive({
 
 na_districts <- shiny::reactive({
   districts_for_nas() %>%         ##As a function insert
-    dplyr::anti_join(pca_scores()) %>%
+    dplyr::anti_join(pca_scores(), by="district") %>%
     dplyr::mutate(PC1 = NA)
 })
 
@@ -108,24 +112,15 @@ labels_map_1 <- reactive({
 
 pal_new_pca <- reactive({
   req(input$bins_pca)
-  # req(unique(map_data()$context) %in% c("negative", "positive"))
-  # if (unique(map_data()$context) == "negative"){
     rev(colorRampPalette(colors = c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c'), space = "Lab")(input$bins_pca))
-    # rev(brewer.pal(input$bins, "RdYlBu"))
-    # c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c')
-  # } else {
-    # colorRampPalette(colors = c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c'), space = "Lab")(input$bins)
-    # brewer.pal(input$bins, "RdYlBu")
-    # c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6')
-  # }
-  
 })
 
 #breaks defined
 breaks_pca <- reactive({
   req(input$bins_pca)
-   # req(unique(map_data()$context) %in% c("negative", "positive"))
-  quantile(map_data_pca()$PC1, seq(0, 1, 1 / (input$bins_pca)), na.rm = TRUE) %>%
+  quantile(map_data_pca()[,"PC1"], 
+           seq(0, 1, 1 / (input$bins_pca)), 
+           na.rm = TRUE) %>%
       unique()
 
 })
@@ -133,11 +128,9 @@ breaks_pca <- reactive({
 pal_pca <- reactive ({
   leaflet::colorBin(palette =  pal_new_pca(),
                       # c('#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c'),
-                    # bins= 5,
                     bins = breaks_pca(),
                     na.color = "grey",
-                    domain = NULL,
-                    map_data_pca()[,"PC1"],
+                    domain = map_data_pca()[,"PC1"],
                     pretty = F,
                     reverse=T
   )
@@ -158,15 +151,13 @@ pal_leg_pca <- reactive ({
 })
 
 #Dynamic leaflet
-# shiny::observeEvent(input$features_selected,{
 observe({
   
   req(input$bins_pca) || req(input$features_selected)
   
-  leaflet::leafletProxy("main_map", data=pti_shps1(),
+  leaflet::leafletProxy("main_map", 
+                        data=pti_shps1(),
                         deferUntilFlush = TRUE) %>%
-    removeControl("legend") %>% 
-    leaflet::clearShapes() %>%
     leaflet::addPolygons(label= labels_map_1(),
                          labelOptions = leaflet::labelOptions(
                            style = list("font-weight"= "normal",
@@ -175,7 +166,6 @@ observe({
                            textsize= "10px",
                            direction = "auto",
                            opacity = 0.9
-                           
                          ),
                          fillColor =  ~pal_pca()(map_data_pca()$PC1),
                          fillOpacity = 1,
@@ -211,9 +201,8 @@ observe({
   }
   
   
-  leaflet::leafletProxy("main_map", data= map_data_pca()) %>%
- 
-    leaflet::clearControls() %>%
+  leaflet::leafletProxy("main_map", 
+                        data= map_data_pca()) %>%
     leaflet::addLegend("bottomright",
                        # pal= pal_leg_pca(),
                        values= map_data_pca()$PC1,
@@ -222,23 +211,7 @@ observe({
                        title = "PCA Scores",
                        opacity= 1,
                        layerId = "legend"
-                       # labelFormat(
-                       #   # leaflet::labelFormat(
-                       #   # between = " : ",
-                       #   # digits = 2,
-                       #   function(x) {
-                       #   paste0(labels_pca_legend) 
-                       #  }
-                       #  #        if (input$bins_pca == 5) {
-                       #  #          c("Priority1","Priority2", "Priority3", "Priority4", "Priority5")
-                       #  #        }else if(input$bins_pca == 4){
-                       #  #          c("Priority1","Priority2", "Priority3", "Priority4")
-                       #  #        }
-                       #  #      }
-                       #     )
     )
-                         
-    
 })
 
 #Plot for PCs
@@ -264,10 +237,8 @@ output$var_explained_pcs <- shiny::renderPlot({
   }
   
   sdev_id()  %>%
-    # mutate(component = forcats::fct_reorder(factor(component), percent_var)) %>%
     ggplot2::ggplot(ggplot2::aes(component, percent_var))+
     ggplot2::geom_col(alpha=0.5, fill = "seagreen", width = 0.4)+
-    # geom_point(aes(component,percent_var))+
     ggplot2::labs(x="Principal Components",
                   y="Variane Explained")+
     ggplot2::scale_y_continuous(labels = scales::percent_format())+
@@ -290,4 +261,27 @@ output$pca_download <- downloadHandler(
 )
 
 
+################################################################################
+#PCA Index
+##############################################.
+#### Modal  ----
+###############################################.
+shiny::observeEvent(input$pca_link_1, {
+  shiny::showModal(modalDialog(
+    title = "What are the PCA scores?",
+    p("The PCA scores are calculated using Principal Component Analysis algorithm, to develop deeper insights into spatial variations based on user-selected criteria."),
+    p("The purpose of this exercise is to ensure that a data-driven methodology is used to inform geographic targeting instead of subjectively assigning weights to various variables."),
+    p("The user can choose any combination of given variables in the dataset to help prioritize/deprioritize admins at the lowest granularity in the country to optimize allocation of limited resources."),
+    size = "m", easyClose = TRUE, fade=FALSE,footer = modalButton("Close (Esc)")))
+})
+
+
+shiny::observeEvent(input$pca_link_2, {
+  shiny::showModal(modalDialog(
+    title = "How should the PCA scores be interpreted?",
+    p("The calculated PCA scores are shown on the map in terms of customizable qunatiles. For instance, when 5 bins are selected, each color-bin represents 20% of the data on the map."),
+    p("The top priroty admins are the ones with highest PCA scores based on user-selected variables."),
+    size = "m", easyClose = TRUE, fade=FALSE,footer = modalButton("Close (Esc)")))
+})
+################################################################################
 
